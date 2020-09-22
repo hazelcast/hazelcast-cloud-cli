@@ -66,8 +66,8 @@ func printTable(rows []table.Row, header table.Row, printType PrintStyle) {
 }
 
 func printItem(data interface{}, printStyle PrintStyle) {
-	if reflect.TypeOf(data) == reflect.TypeOf(models.ClusterResponse{}) {
-		printCluster(data.(models.ClusterResponse), printStyle)
+	if reflect.TypeOf(data) == reflect.TypeOf(models.Cluster{}) {
+		printCluster(data.(models.Cluster), printStyle)
 	} else {
 		color.Red("Not Implemented")
 		os.Exit(1)

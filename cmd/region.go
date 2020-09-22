@@ -13,18 +13,18 @@ import (
 var regionCloudProvider string
 
 var regionCmd = &cobra.Command{
-	Use:   "region",
+	Use:     "region",
 	Aliases: []string{"r"},
-	Short: "This command used to collect supported cloud providers regions related information.",
+	Short:   "This command used to collect supported cloud providers regions related information.",
 }
 
 var regionListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "This command lists available regions for Hazelcast Enterprise on selected cloud provider.",
+	Use:     "list",
+	Short:   "This command lists available regions for Hazelcast Enterprise on selected cloud provider.",
 	Example: "hzcloud region list --cloud-provider=azure",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := internal.NewClient()
-		regions := internal.Validate(client.Region.List(context.Background(), &models.RegionRequest{
+		regions := internal.Validate(client.Region.List(context.Background(), &models.RegionInput{
 			CloudProvider: regionCloudProvider,
 		})).(*[]models.Region)
 		header := table.Row{"#", "Name", "Available in Starter", "Available in Enterprise"}
@@ -44,7 +44,7 @@ var regionListCmd = &cobra.Command{
 func init() {
 	rootCmd.AddCommand(regionCmd)
 	regionCmd.AddCommand(regionListCmd)
-	regionListCmd.Flags().StringVar(&regionCloudProvider, "cloud-provider",  "", "name of the cloud provider")
+	regionListCmd.Flags().StringVar(&regionCloudProvider, "cloud-provider", "", "name of the cloud provider")
 	err := regionListCmd.MarkFlagRequired("cloud-provider")
 	if err != nil {
 		panic(err)

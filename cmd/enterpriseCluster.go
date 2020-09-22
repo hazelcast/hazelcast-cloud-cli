@@ -19,7 +19,7 @@ var enterpriseClusterCreateInput models.CreateEnterpriseClusterInput
 var enterpriseClusterCmd = &cobra.Command{
 	Use:     "enterprise-cluster",
 	Aliases: []string{"ec"},
-	Short: "This command allows you to make actions on your enterprise clusters like; create and delete.",
+	Short:   "This command allows you to make actions on your enterprise clusters like; create and delete.",
 }
 
 var enterpriseClusterCreateCmd = &cobra.Command{
@@ -28,7 +28,7 @@ var enterpriseClusterCreateCmd = &cobra.Command{
 	Example: "hzcloud enterprise-cluster create --name=mycluster2 --cloud-provider=aws --region=eu-west-2 --zones=eu-west-2b --hazelcast-version=4.0 --instance-type=m5.large --cidr-block=10.0.80.0/16 --native-memory=4 --wait",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client := internal.NewClient()
-		cluster := internal.Validate(client.EnterpriseCluster.Create(context.Background(), &enterpriseClusterCreateInput)).(*models.ClusterResponse)
+		cluster := internal.Validate(client.EnterpriseCluster.Create(context.Background(), &enterpriseClusterCreateInput)).(*models.Cluster)
 		color.Green("Cluster creation started.")
 		waitCondition, _ := cmd.Flags().GetBool("wait")
 		if waitCondition {
@@ -37,11 +37,11 @@ var enterpriseClusterCreateCmd = &cobra.Command{
 			for {
 				cluster, _, _ = client.EnterpriseCluster.Get(context.Background(), &models.GetEnterpriseClusterInput{ClusterId: cluster.Id})
 				loading.SetStep(cluster.Progress.Status, cluster.Progress.CompletedItemCount)
-				if cluster.State == models.RUNNING {
+				if cluster.State == models.Running {
 					loading.Stop()
 					color.Green("Cluster successfully created in %s", loading.Stop())
 					break
-				} else if cluster.State == models.FAILED {
+				} else if cluster.State == models.Failed {
 					loading.Stop()
 					color.Red("Cluster failed in %s", loading.Stop())
 					break
@@ -61,7 +61,7 @@ var enterpriseClusterGetCmd = &cobra.Command{
 		client := internal.NewClient()
 		cluster := internal.Validate(client.EnterpriseCluster.Get(context.Background(), &models.GetEnterpriseClusterInput{
 			ClusterId: starterClusterId,
-		})).(*models.ClusterResponse)
+		})).(*models.Cluster)
 		util.Print(util.PrintRequest{
 			Data:       *cluster,
 			PrintStyle: util.PrintStyle(outputStyle),
@@ -75,7 +75,7 @@ var enterpriseClusterListCmd = &cobra.Command{
 	Example: "hzcloud enterprise-cluster list",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := internal.NewClient()
-		clusters := internal.Validate(client.EnterpriseCluster.List(context.Background())).(*[]models.ClusterResponse)
+		clusters := internal.Validate(client.EnterpriseCluster.List(context.Background())).(*[]models.Cluster)
 		header := table.Row{"Id", "Name", "State", "Version", "Memory(GiB)", "Network", "Instance", "Per Zone", "Cloud Provider", "Region", "Zones"}
 		var rows []table.Row
 		for _, cluster := range *clusters {
@@ -99,9 +99,9 @@ var enterpriseClusterDeleteCmd = &cobra.Command{
 	Example: "hzcloud enterprise-cluster delete --cluster-id=3",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := internal.NewClient()
-		clusterResponse := internal.Validate(client.EnterpriseCluster.Delete(context.Background(), &models.ClusterDeleteRequest{
+		clusterResponse := internal.Validate(client.EnterpriseCluster.Delete(context.Background(), &models.ClusterDeleteInput{
 			ClusterId: enterpriseClusterId,
-		})).(*models.ClusterIdResponse)
+		})).(*models.ClusterId)
 		color.Blue("Cluster %d deleted.", clusterResponse.ClusterId)
 	},
 }

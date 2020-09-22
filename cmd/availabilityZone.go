@@ -27,7 +27,7 @@ var availabilityZoneListCmd = &cobra.Command{
 	Example: "hzcloud availability-zone list --cloud-provider=aws --region=us-wet-2 --instance-type=m5.large --count=3",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := internal.NewClient()
-		availabilityZones := internal.Validate(client.AvailabilityZone.List(context.Background(), &models.AvailabilityZoneRequest{
+		availabilityZones := internal.Validate(client.AvailabilityZone.List(context.Background(), &models.AvailabilityZoneInput{
 			CloudProvider: availabilityZoneCloudProvider,
 			Region:        availabilityZoneRegion,
 			InstanceType:  availabilityZoneInstanceType,
@@ -67,7 +67,7 @@ func init() {
 	availabilityZoneListCmd.Flags().StringVar(&availabilityZoneCloudProvider, "cloud-provider", "", "name of the cloud provider")
 	availabilityZoneListCmd.Flags().StringVar(&availabilityZoneRegion, "region", "", "name of the cegion")
 	availabilityZoneListCmd.Flags().StringVar(&availabilityZoneInstanceType, "instance-type", "", "name of the instance type")
-	availabilityZoneListCmd.Flags().IntVar(&availabilityZoneInstanceCount, "count",0, "instance count per zone")
+	availabilityZoneListCmd.Flags().IntVar(&availabilityZoneInstanceCount, "count", 0, "instance count per zone")
 	err := availabilityZoneListCmd.MarkFlagRequired("cloud-provider")
 	err = availabilityZoneListCmd.MarkFlagRequired("region")
 	err = availabilityZoneListCmd.MarkFlagRequired("instance-type")

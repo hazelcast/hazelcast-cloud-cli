@@ -8,7 +8,6 @@ import (
 	"github.com/fatih/color"
 	"io"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -39,7 +38,8 @@ func (v UpdateService) Update() {
 	}
 	latestRelease, hasNewRelease, latestReleaseErr := v.getLatestRelease()
 	if latestReleaseErr != nil {
-		log.Panic("An error occurred while getting latest release.", latestReleaseErr)
+		fmt.Println("An error occurred while getting latest release.")
+		return
 	}
 
 	if !hasNewRelease {
@@ -109,8 +109,8 @@ func (v UpdateService) Check(force bool) {
 	latestRelease, hasNewerVersion, compareErr := v.getLatestRelease()
 	if compareErr != nil && force {
 		fmt.Println("An error occurred while checking updates")
+		return
 	}
-	v.updateLastVersionCheck()
 	if hasNewerVersion {
 		bold := color.New(color.Bold)
 		cyan := color.New(color.Bold, color.FgHiBlue)
@@ -132,10 +132,6 @@ func (v UpdateService) getCurrentPath() (string, error) {
 		return "", currentDirErr
 	}
 	return currentDir, nil
-}
-
-func (v UpdateService) updateLastVersionCheck() {
-
 }
 
 func (v UpdateService) isVersionCheckNeeded() bool {

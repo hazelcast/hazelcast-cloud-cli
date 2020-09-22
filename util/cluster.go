@@ -10,27 +10,27 @@ import (
 	"strings"
 )
 
-func AugmentStarterHazelcastVersion(starterClusterCreateHazelcastVersion float64) (models.StarterHazelcastVersion,error) {
+func AugmentStarterHazelcastVersion(starterClusterCreateHazelcastVersion float64) (models.StarterHazelcastVersion, error) {
 	switch starterClusterCreateHazelcastVersion {
 	case 3.12:
 		return models.Version312, nil
 	case 4.0:
-		return models.Version40,nil
+		return models.Version40, nil
 	default:
 		return "", errors.New("You can only select 3.12 or 4.0 for Hazelcast version.")
 	}
 }
 
-func AugmentStarterClusterType(starterClusterCreateClusterType string) (models.StarterClusterType,error) {
+func AugmentStarterClusterType(starterClusterCreateClusterType string) (models.StarterClusterType, error) {
 	switch strings.ToUpper(starterClusterCreateClusterType) {
 	case "FREE":
-		return models.FREE, nil
+		return models.Free, nil
 	case "SMALL":
-		return models.SMALL,nil
+		return models.Small, nil
 	case "MEDIUM":
-		return models.MEDIUM,nil
+		return models.Medium, nil
 	case "LARGE":
-		return models.LARGE,nil
+		return models.Large, nil
 	default:
 		return "", errors.New("You can only select FREE, SMALL, MEDIUM or LARGE for cluster type.")
 	}
@@ -43,11 +43,11 @@ func getEnabledDisable(bool bool) string {
 	return "Disabled"
 }
 
-func getIsClusterEnterprise(cluster models.ClusterResponse) bool {
-	return cluster.ProductType.Name == models.ENTERPRISE
+func getIsClusterEnterprise(cluster models.Cluster) bool {
+	return cluster.ProductType.Name == models.Enterprise
 }
 
-func printCluster(cluster models.ClusterResponse, printStyle PrintStyle) {
+func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 	wr := list.NewWriter()
 	wr.SetOutputMirror(os.Stdout)
 	wr.SetStyle(list.StyleConnectedBold)
@@ -292,5 +292,3 @@ func printCluster(cluster models.ClusterResponse, printStyle PrintStyle) {
 		os.Exit(1)
 	}
 }
-
-

@@ -13,18 +13,18 @@ import (
 var instanceTypeCloudProvider string
 
 var instanceTypeCmd = &cobra.Command{
-	Use:   "instance-type",
+	Use:     "instance-type",
 	Aliases: []string{"it"},
-	Short: "This command used to collect supported instance types for different cloud providers.",
+	Short:   "This command used to collect supported instance types for different cloud providers.",
 }
 
 var instanceTypeListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "This command lists instance types that Hazelcast Enterprise supports.",
+	Use:     "list",
+	Short:   "This command lists instance types that Hazelcast Enterprise supports.",
 	Example: "hzcloud instance-type list",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := internal.NewClient()
-		instanceTypes := internal.Validate(client.InstanceType.List(context.Background(), &models.InstanceTypeRequest{
+		instanceTypes := internal.Validate(client.InstanceType.List(context.Background(), &models.InstanceTypeInput{
 			CloudProvider: instanceTypeCloudProvider,
 		})).(*[]models.InstanceType)
 		header := table.Row{"#", "Name", "Total Memory (GiB)"}
