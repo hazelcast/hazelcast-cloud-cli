@@ -107,22 +107,22 @@ func (v UpdateService) Check(force bool) {
 		return
 	}
 	latestRelease, hasNewerVersion, compareErr := v.getLatestRelease()
+	bold := color.New(color.Bold)
+	cyan := color.New(color.Bold, color.FgHiBlue)
 	if compareErr != nil && force {
-		fmt.Println("An error occurred while checking updates")
+		fmt.Println("An error occurred while checking updates.")
 		return
 	}
 	if hasNewerVersion {
-		bold := color.New(color.Bold)
-		cyan := color.New(color.Bold, color.FgHiBlue)
-		fmt.Printf("%s has new version -> %s!\nYou can update with ",
-			bold.Sprintf("Hazelcast Cloud CLI "), bold.Sprintf(latestRelease.TagName))
+		fmt.Printf("%s\nCurrent Version: %s\nNew version: %s\nYou can update with ",
+			cyan.Sprintf("Hazelcast Cloud CLI"), bold.Sprintf(Version), bold.Sprintf(latestRelease.TagName))
 		if strings.ToLower(Distribution) == "brew" {
 			_, _ = cyan.Println("brew update hzcloud")
 		} else {
-			_, _ = cyan.Println("hazelcast version update")
+			_, _ = bold.Println("hazelcast version update")
 		}
 	} else if force {
-		fmt.Println("Hazelcast Cloud CLI is up to date")
+		fmt.Printf("%s v%s is up to date.\n", bold.Sprintf("Hazelcast Cloud CLI"), bold.Sprintf(Version))
 	}
 }
 
@@ -136,15 +136,12 @@ func (v UpdateService) getCurrentPath() (string, error) {
 
 func (v UpdateService) isVersionCheckNeeded() bool {
 	lastVersionCheckTS := v.ConfigService.GetInt64(LastVersionCheckTime)
-
-	if lastVersionCheckTS == 0 {
-		v.ConfigService.Set(LastVersionCheckTime, time.Now().Unix())
-		return true
-	}
-
 	lastVersionCheckTime := time.Unix(lastVersionCheckTS, 0)
-
-	return time.Since(lastVersionCheckTime).Hours() > 24
+	isNeeded := time.Since(lastVersionCheckTime).Hours() > 24
+	if isNeeded {
+		v.ConfigService.Set(LastVersionCheckTime, time.Now().Unix())
+	}
+	return isNeeded
 }
 
 func (v UpdateService) getLatestRelease() (Release, bool, error) {
