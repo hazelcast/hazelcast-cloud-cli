@@ -10,7 +10,6 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -19,7 +18,6 @@ import (
 var GithubRepository = "hazelcast/hazelcast-cloud-cli"
 var Version string
 var Distribution string
-var binary = "hzcloud"
 
 type UpdateService struct {
 	ConfigService ConfigService
@@ -30,7 +28,6 @@ func NewUpdaterService() UpdateService {
 		ConfigService: NewConfigService(),
 	}
 }
-
 func (v UpdateService) Update() {
 	if strings.ToLower(Distribution) == "brew" {
 		println("You can not update brew package with this command, please use `brew upgrade hzcloud`")
@@ -41,7 +38,6 @@ func (v UpdateService) Update() {
 		fmt.Println("An error occurred while getting latest release.")
 		return
 	}
-
 	if !hasNewRelease {
 		fmt.Println("Hazelcast Cloud CLI is up to date.")
 		return
@@ -49,59 +45,49 @@ func (v UpdateService) Update() {
 	fmt.Println("CLI update started.")
 	browserDownloadUrl := ""
 	for _, asset := range latestRelease.Assets {
-		if asset.Name == fmt.Sprintf("%s-%s-%s", binary, runtime.GOOS, runtime.GOARCH) {
+		if asset.Name == fmt.Sprintf("hzcloud-%s-%s", runtime.GOOS, runtime.GOARCH) {
 			browserDownloadUrl = asset.BrowserDownloadUrl
 		}
 	}
-
 	if browserDownloadUrl == "" {
 		panic("An error occurred while getting latest release.")
 	}
-
 	newFile, err := http.Get(browserDownloadUrl)
 	if err != nil {
 		panic("An error occurred while getting latest release.")
 	}
 	defer newFile.Body.Close()
-
-	currentPath, currentPathErr := v.getCurrentPath()
-	if currentPathErr != nil {
+	executablePath, executablePathErr := v.getExecutablePath()
+	if executablePathErr != nil {
 		panic("An error occurred while updating.")
 	}
-
-	binaryPath := fmt.Sprintf("%s/%s", currentPath, binary)
-	moveBinaryErr := os.Rename(binaryPath, fmt.Sprintf("%s.tmp", binaryPath))
+	moveBinaryErr := os.Rename(executablePath, fmt.Sprintf("%s.tmp", executablePath))
 	if moveBinaryErr != nil {
-		panic("An error occurred while updating.")
+		panic(fmt.Sprintf("An error occurred while updating. %s", moveBinaryErr))
 	}
-
-	out, createErr := os.Create(binaryPath)
+	out, createErr := os.Create(executablePath)
 	if createErr != nil {
-		_ = os.Rename(fmt.Sprintf("%s.tmp", binaryPath), binaryPath)
+		_ = os.Rename(fmt.Sprintf("%s.tmp", executablePath), executablePath)
 		panic("An error occurred while updating.")
 	}
 	defer out.Close()
-
 	_, copyErr := io.Copy(out, newFile.Body)
 	if copyErr != nil {
-		_ = os.Rename(fmt.Sprintf("%s.tmp", binaryPath), binaryPath)
+		_ = os.Rename(fmt.Sprintf("%s.tmp", executablePath), executablePath)
 		panic("An error occurred while updating.")
 	}
-	_ = os.Chmod(binary, 0755)
+	_ = os.Chmod(executablePath, 0755)
 	fmt.Println("CLI update finished.")
 	os.Exit(1)
 }
-
 func (v UpdateService) Run() {
 	v.Clean()
 	v.Update()
 }
-
 func (v UpdateService) Clean() {
-	currentPath, _ := v.getCurrentPath()
-	os.Remove(fmt.Sprintf("%s/%s.tmp", currentPath, binary))
+	currentPath, _ := v.getExecutablePath()
+	_ = os.Remove(fmt.Sprintf("%s.tmp", currentPath))
 }
-
 func (v UpdateService) Check(force bool) {
 	if !v.isVersionCheckNeeded() && !force {
 		return
@@ -122,18 +108,16 @@ func (v UpdateService) Check(force bool) {
 			_, _ = bold.Println("hazelcast version update")
 		}
 	} else if force {
-		fmt.Printf("%s v%s is up to date.\n", bold.Sprintf("Hazelcast Cloud CLI"), bold.Sprintf(Version))
+		fmt.Printf("%s %s is up to date.\n", bold.Sprintf("Hazelcast Cloud CLI"), bold.Sprintf(Version))
 	}
 }
-
-func (v UpdateService) getCurrentPath() (string, error) {
-	currentDir, currentDirErr := filepath.Abs(filepath.Dir(os.Args[0]))
-	if currentDirErr != nil {
-		return "", currentDirErr
+func (v UpdateService) getExecutablePath() (string, error) {
+	executablePath, err := os.Executable()
+	if err != nil {
+		return "", err
 	}
-	return currentDir, nil
+	return executablePath, nil
 }
-
 func (v UpdateService) isVersionCheckNeeded() bool {
 	lastVersionCheckTS := v.ConfigService.GetInt64(LastVersionCheckTime)
 	lastVersionCheckTime := time.Unix(lastVersionCheckTS, 0)
@@ -143,7 +127,6 @@ func (v UpdateService) isVersionCheckNeeded() bool {
 	}
 	return isNeeded
 }
-
 func (v UpdateService) getLatestRelease() (Release, bool, error) {
 	resp, respErr := http.Get(fmt.Sprintf("https://api.github.com/repos/%s/releases/latest", GithubRepository))
 	if respErr != nil {
@@ -161,7 +144,6 @@ func (v UpdateService) getLatestRelease() (Release, bool, error) {
 	if latestRelease.TagName == "" {
 		return Release{}, false, errors.New("latest release not found")
 	}
-
 	currentVersion, semVerErr := semver.ParseTolerant(Version)
 	if semVerErr != nil {
 		return latestRelease, false, semVerErr
@@ -177,7 +159,6 @@ type Release struct {
 	TagName string  `json:"tag_name"`
 	Assets  []Asset `json:"assets"`
 }
-
 type Asset struct {
 	Name               string `json:"name"`
 	BrowserDownloadUrl string `json:"browser_download_url"`
