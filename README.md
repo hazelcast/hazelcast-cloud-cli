@@ -16,12 +16,13 @@
 ## Installing `hzcloud`
 ### Using a Package Manager (Homebrew)
 ```sh
-brew tap hzcloud/hazelcast
+brew tap hazelcast/hzcloud
 brew install hzcloud
 ```
 ### Downloading a Release from GitHub
 Visit the [Releases page](https://github.com/hazelcast/hazelcast-cloud-cli/releases) for the
 [`hzcloud` GitHub project](https://github.com/hazelcast/hazelcast-cloud-cli), and find the version for your operating system and architecture. Then place it into your directory with name `hzcloud` or `hzcloud.exe` for Windows.
+
 **Linux** 
 ```sh
 wget \
