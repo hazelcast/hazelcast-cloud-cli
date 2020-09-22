@@ -20,7 +20,9 @@ func NewClient() *hazelcastcloud.Client {
 	}
 
 	if len(strings.TrimSpace(apiKey)) == 0 || len(strings.TrimSpace(apiSecret)) == 0 {
-		println("Authentication Error: hzcloud CLI tool  is  not configured correctly, please see for more details https://github.com/hazelcast/hazelcast-cloud-cli/configuration")
+		println("Authentication Error: hzcloud CLI tool is not configured correctly. " +
+			"You need to login via `hzcloud login` or set `HZ_CLOUD_API_KEY` and `HZ_CLOUD_API_SECRET` environment" +
+			" variables. For more details https://github.com/hazelcast/hazelcast-cloud-cli#authentication-with-hazelcast-cloud")
 		os.Exit(1)
 	}
 
