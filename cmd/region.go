@@ -28,7 +28,7 @@ var regionListCmd = &cobra.Command{
 			CloudProvider: regionCloudProvider,
 		})).(*[]models.Region)
 		header := table.Row{"#", "Name", "Available in Starter", "Available in Enterprise"}
-		var rows []table.Row
+		rows := []table.Row{}
 		for k, cloudProvider := range *regions {
 			rows = append(rows, table.Row{k + 1, cloudProvider.Name, cloudProvider.IsEnabledForStarter, cloudProvider.IsEnabledForEnterprise})
 		}

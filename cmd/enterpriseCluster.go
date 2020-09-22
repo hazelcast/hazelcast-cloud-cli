@@ -77,7 +77,7 @@ var enterpriseClusterListCmd = &cobra.Command{
 		client := internal.NewClient()
 		clusters := internal.Validate(client.EnterpriseCluster.List(context.Background())).(*[]models.Cluster)
 		header := table.Row{"Id", "Name", "State", "Version", "Memory(GiB)", "Network", "Instance", "Per Zone", "Cloud Provider", "Region", "Zones"}
-		var rows []table.Row
+		rows := []table.Row{}
 		for _, cluster := range *clusters {
 			rows = append(rows, table.Row{cluster.Id, cluster.Name, cluster.State, cluster.HazelcastVersion,
 				cluster.Specs.TotalMemory, cluster.Networking.Type, cluster.Specs.InstanceType, cluster.Specs.InstancePerZone,

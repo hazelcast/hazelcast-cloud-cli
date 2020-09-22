@@ -10,20 +10,20 @@ import (
 )
 
 var cloudProviderCmd = &cobra.Command{
-	Use:   "cloud-provider",
+	Use:     "cloud-provider",
 	Aliases: []string{"cp"},
-	Short: "This command used to collect supported cloud provider related information.",
+	Short:   "This command used to collect supported cloud provider related information.",
 }
 
 var cloudProviderListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "This command lists a available cloud provider list that Hazelcast Cloud supports.",
+	Use:     "list",
+	Short:   "This command lists a available cloud provider list that Hazelcast Cloud supports.",
 	Example: "hzcloud cloud-provider list",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := internal.NewClient()
 		cloudProvider := internal.Validate(client.CloudProvider.List(context.Background())).(*[]models.CloudProvider)
 		header := table.Row{"#", "Name", "Available in Starter", "Available in Enterprise"}
-		var rows []table.Row
+		rows := []table.Row{}
 		for k, cloudProvider := range *cloudProvider {
 			rows = append(rows, table.Row{k + 1, cloudProvider.Name, cloudProvider.IsEnabledForStarter, cloudProvider.IsEnabledForEnterprise})
 		}

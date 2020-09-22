@@ -11,22 +11,22 @@ import (
 )
 
 var hazelcastVersionCmd = &cobra.Command{
-	Use:   "hazelcast-version",
+	Use:     "hazelcast-version",
 	Aliases: []string{"hv"},
-	Short: "This command used to collect supported available Hazelcast Versions on the cloud.",
+	Short:   "This command used to collect supported available Hazelcast Versions on the cloud.",
 }
 
 var hazelcastVersionListCmd = &cobra.Command{
-	Use:   "list",
-	Short: "This command lists available Hazelcast Versions.",
-	Long:  "This command lists available Hazelcast Versions that Hazelcast Cloud support on their Enterprise product.",
+	Use:     "list",
+	Short:   "This command lists available Hazelcast Versions.",
+	Long:    "This command lists available Hazelcast Versions that Hazelcast Cloud support on their Enterprise product.",
 	Example: "hzcloud hazelcast-version list",
-	Args:  cobra.NoArgs,
+	Args:    cobra.NoArgs,
 	Run: func(cmd *cobra.Command, args []string) {
 		client := internal.NewClient()
 		versions := internal.Validate(client.HazelcastVersion.List(context.Background())).(*[]models.EnterpriseHazelcastVersion)
 		header := table.Row{"#", "Version", "Upgradeable Versions"}
-		var rows []table.Row
+		rows := []table.Row{}
 		for k, version := range *versions {
 			rows = append(rows, table.Row{k + 1, version.Version, strings.Join(version.UpgradeableVersions, " ")})
 		}

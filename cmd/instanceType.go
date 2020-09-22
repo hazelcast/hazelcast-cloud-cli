@@ -28,7 +28,7 @@ var instanceTypeListCmd = &cobra.Command{
 			CloudProvider: instanceTypeCloudProvider,
 		})).(*[]models.InstanceType)
 		header := table.Row{"#", "Name", "Total Memory (GiB)"}
-		var rows []table.Row
+		rows := []table.Row{}
 		for k, instanceType := range *instanceTypes {
 			rows = append(rows, table.Row{k + 1, instanceType.Name, instanceType.TotalMemory})
 		}

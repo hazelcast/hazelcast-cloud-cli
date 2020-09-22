@@ -34,7 +34,7 @@ var availabilityZoneListCmd = &cobra.Command{
 			InstanceCount: availabilityZoneInstanceCount,
 		})).(*[]models.AvailabilityZone)
 		header := table.Row{"#", "Name"}
-		var rows []table.Row
+		rows := []table.Row{}
 		for k, availabilityZone := range *availabilityZones {
 			rows = append(rows, table.Row{k + 1, availabilityZone.Name})
 		}
