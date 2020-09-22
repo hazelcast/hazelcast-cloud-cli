@@ -1,0 +1,8 @@
+**/.idea
+.DS_Store
+**/target
+**/*.iml
+**/dependency-reduced-pom.xml
+.vscode
+__debug_bin
+hzcloud
