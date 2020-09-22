@@ -105,7 +105,7 @@ func (v UpdateService) Check(force bool) {
 		if strings.ToLower(Distribution) == "brew" {
 			_, _ = cyan.Println("brew upgrade hzcloud")
 		} else {
-			_, _ = bold.Println("hazelcast version update")
+			_, _ = bold.Println("hzcloud version update")
 		}
 	} else if force {
 		fmt.Printf("%s %s is up to date.\n", bold.Sprintf("Hazelcast Cloud CLI"), bold.Sprintf(Version))
