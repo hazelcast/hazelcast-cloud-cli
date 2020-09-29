@@ -43,7 +43,7 @@ wget \
   -O /usr/local/bin/hzcloud && chmod +x /usr/local/bin/hzcloud
 ```
 ## Authentication with Hazelcast Cloud
-After a successful installation, in order to use, you need to authenticate with Hazelcast Cloud by providing access tokens, which can be created from `Developers` tab in [Hazelcast Cloud](https://cloud.hazelcast.com). You can check how to generate API Key and API Secret following the [Hazelcast Cloud Documentation](https://cloud.hazelcast.com).
+After a successful installation, in order to use, you need to authenticate with Hazelcast Cloud by providing access tokens, which can be created from `Developers` tab in [Hazelcast Cloud](https://cloud.hazelcast.com). You can check how to generate API Key and API Secret following the [Hazelcast Cloud Developer Documentation](https://docs.cloud.hazelcast.com/docs/developer).
 
 ### Using Environment Variables (Option 1)
 You can pass your API Key as `HZ_CLOUD_API_KEY` and API Secret as `HZ_CLOUD_API_SECRET` on your environment variables. `hzcloud` will use these them to authenticate with Hazelcast Cloud
