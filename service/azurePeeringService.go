@@ -14,7 +14,6 @@ import (
 	"github.com/Azure/go-autorest/autorest/azure/auth"
 	"github.com/Azure/go-autorest/autorest/to"
 	"github.com/google/uuid"
-	"github.com/hazelcast/hazelcast-cloud-cli/internal"
 	"github.com/hazelcast/hazelcast-cloud-cli/util"
 	hazelcastcloud "github.com/hazelcast/hazelcast-cloud-sdk-go"
 	"github.com/hazelcast/hazelcast-cloud-sdk-go/models"
@@ -23,7 +22,14 @@ import (
 )
 
 type AzurePeeringService struct {
-	Client *hazelcastcloud.Client
+	Client                         *hazelcastcloud.Client
+	CustomerPeeringProperties      *AzureCustomerPeeringProperties
+	HazelcastPeeringProperties     *models.AzurePeeringProperties
+	HazelcastVnetPeeringClient     network.VirtualNetworkPeeringsClient
+	CustomerVnetPeeringClient      network.VirtualNetworkPeeringsClient
+	CustomerServicePrincipalClient graphrbac.ServicePrincipalsClient
+	CustomerRoleAssignmentClient   authorization.RoleAssignmentsClient
+	ServicePrincipalObjectId       string
 }
 
 type AzureCustomerPeeringProperties struct {
@@ -34,195 +40,230 @@ type AzureCustomerPeeringProperties struct {
 	ResourceGroupName string
 }
 
-func NewAzurePeeringService(client *hazelcastcloud.Client) AzurePeeringService {
+func NewAzurePeeringService(client *hazelcastcloud.Client, customerProperties *AzureCustomerPeeringProperties) AzurePeeringService {
 	return AzurePeeringService{
-		Client: client,
+		Client:                    client,
+		CustomerPeeringProperties: customerProperties,
 	}
 }
 
-func (s AzurePeeringService) Create(customerProperties *AzureCustomerPeeringProperties, indicator *util.LoadingIndicator) error {
-	hazelcastPeeringProperties := internal.Validate(s.Client.AzurePeering.GetProperties(context.Background(), &models.GetAzurePeeringPropertiesInput{
-		ClusterId: customerProperties.ClusterId,
-	})).(*models.AzurePeeringProperties)
-
-	indicator.SetStep("Authorizers collecting...", 10)
-	hazelcastMultiTenantAuthorizer, hazelcastMultiTenantAuthorizerErr := s.getHazelcastMultiTenantAuthorizer(hazelcastPeeringProperties, *customerProperties)
-	if hazelcastMultiTenantAuthorizerErr != nil {
-		return hazelcastMultiTenantAuthorizerErr
+func (s AzurePeeringService) Create(indicator *util.LoadingIndicator) error {
+	indicator.SetStep("Peering Properties collecting...", 10)
+	initHazelcastPeeringPropertiesErr := s.initHazelcastPeeringProperties()
+	if initHazelcastPeeringPropertiesErr != nil {
+		return initHazelcastPeeringPropertiesErr
 	}
-
-	customerMultiTenantAuthorizer, customerMultiTenantAuthorizerErr := s.getCustomerMultiTenantAuthorizer(hazelcastPeeringProperties, *customerProperties)
-	if customerMultiTenantAuthorizerErr != nil {
-		return customerMultiTenantAuthorizerErr
+	indicator.SetStep("Clients initializing...", 20)
+	initClientErr := s.initClients()
+	if initClientErr != nil {
+		return initClientErr
 	}
-
-	customerAuthorizer, customerAuthorizerErr := s.getCustomerAuthorizer()
-	if customerAuthorizerErr != nil {
-		return customerAuthorizerErr
-	}
-
-	customerGraphAuthorizer, customerGraphAuthorizerErr := s.getCustomerGraphAuthorizer()
-	if customerGraphAuthorizerErr != nil {
-		return customerGraphAuthorizerErr
-	}
-
-	hazelcastVnetPeeringClient := network.NewVirtualNetworkPeeringsClient(hazelcastPeeringProperties.SubscriptionId)
-	hazelcastVnetPeeringClient.Authorizer = hazelcastMultiTenantAuthorizer
-	customerVnetPeeringClient := network.NewVirtualNetworkPeeringsClient(customerProperties.SubscriptionId)
-	customerVnetPeeringClient.Authorizer = customerMultiTenantAuthorizer
-	customerServicePrincipalClient := graphrbac.NewServicePrincipalsClient(customerProperties.TenantId)
-	customerServicePrincipalClient.Authorizer = customerGraphAuthorizer
-	customerRoleAssignmentClient := authorization.NewRoleAssignmentsClient(customerProperties.SubscriptionId)
-	customerRoleAssignmentClient.Authorizer = customerAuthorizer
-
 	indicator.SetStep("Service Principal creating...", 30)
-	servicePrincipal, createServicePrincipalErr := customerServicePrincipalClient.Create(context.Background(), graphrbac.ServicePrincipalCreateParameters{
-		AppID:          &hazelcastPeeringProperties.AppRegistrationId,
-		AccountEnabled: to.BoolPtr(true),
-	})
-	if createServicePrincipalErr != nil {
-		if createServicePrincipalErr.(autorest.DetailedError).StatusCode != 409 {
-			return createServicePrincipalErr
-		}
-		list, hazelcastServicePrincipalFindErr := customerServicePrincipalClient.List(context.Background(), fmt.Sprintf("appId eq '%s'", hazelcastPeeringProperties.AppRegistrationId))
-		if hazelcastServicePrincipalFindErr != nil {
-			return hazelcastServicePrincipalFindErr
-		}
-		servicePrincipal = list.Values()[0]
-	} else {
-		indicator.SetStep("Waiting for Service Principal to be ready...", 40)
-		time.Sleep(30 * time.Second)
+	initServicePrincipalErr := s.createServicePrincipal()
+	if initServicePrincipalErr != nil {
+		return initServicePrincipalErr
 	}
+	indicator.SetStep("Role Assignment creating...", 45)
+	initRoleAssignmentsErr := s.createRoleAssignment()
+	if initRoleAssignmentsErr != nil {
+		return initRoleAssignmentsErr
+	}
+	indicator.SetStep("Orphan Peerings deleting...", 55)
+	s.deleteOrphanPeerings()
+	indicator.SetStep("Customer Peering creating...", 65)
+	initCustomerPeeringErr := s.createCustomerPeering()
+	if initCustomerPeeringErr != nil {
+		return initCustomerPeeringErr
+	}
+	indicator.SetStep("Hazelcast Peering creating...", 80)
+	initHazelcastPeeringErr := s.createHazelcastPeering()
+	if initHazelcastPeeringErr != nil {
+		return initHazelcastPeeringErr
+	}
+	indicator.SetStep("Peering notifying...", 95)
+	notifyPeeringErr := s.notifyPeering()
+	if notifyPeeringErr != nil {
+		return notifyPeeringErr
+	}
+	return nil
+}
 
-	indicator.SetStep("Role Assignment creating...", 50)
-	networkContributorRoleId := fmt.Sprintf("/subscriptions/%s/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7", customerProperties.SubscriptionId)
-	_, roleAssignmentErr := customerRoleAssignmentClient.Create(context.Background(), s.getCustomerVnetId(customerProperties),
+func (s AzurePeeringService) notifyPeering() error {
+	marshal, _ := json.Marshal(struct {
+		PeeringConnectionId string `json:"peeringConnectionId"`
+		ClusterId           string `json:"clusterId"`
+	}{
+		s.getHazelcastPeeringName(),
+		s.CustomerPeeringProperties.ClusterId,
+	})
+	request, requestErr := http.NewRequest("POST", fmt.Sprintf("%s/peerings", s.Client.BaseURL), bytes.NewBuffer(marshal))
+	if requestErr != nil {
+		return requestErr
+	}
+	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.Client.Token))
+	client := &http.Client{}
+	_, respErr := client.Do(request)
+	if respErr != nil {
+		return respErr
+	}
+	return nil
+}
+
+func (s AzurePeeringService) createHazelcastPeering() error {
+	_, createCustomerPeeringErr := s.HazelcastVnetPeeringClient.CreateOrUpdate(context.Background(),
+		s.HazelcastPeeringProperties.ResourceGroupName, s.HazelcastPeeringProperties.VnetName, s.getHazelcastPeeringName(),
+		network.VirtualNetworkPeering{VirtualNetworkPeeringPropertiesFormat: &network.VirtualNetworkPeeringPropertiesFormat{
+			AllowVirtualNetworkAccess: to.BoolPtr(true),
+			AllowForwardedTraffic:     to.BoolPtr(true),
+			RemoteVirtualNetwork: &network.SubResource{
+				ID: to.StringPtr(s.getCustomerVnetId()),
+			},
+		}})
+	if createCustomerPeeringErr != nil {
+		return createCustomerPeeringErr
+	}
+	return nil
+}
+
+func (s AzurePeeringService) createCustomerPeering() error {
+	_, createCustomerPeeringErr := s.CustomerVnetPeeringClient.CreateOrUpdate(context.Background(),
+		s.CustomerPeeringProperties.ResourceGroupName, s.CustomerPeeringProperties.VnetName, s.getCustomerPeeringName(),
+		network.VirtualNetworkPeering{VirtualNetworkPeeringPropertiesFormat: &network.VirtualNetworkPeeringPropertiesFormat{
+			AllowVirtualNetworkAccess: to.BoolPtr(true),
+			AllowForwardedTraffic:     to.BoolPtr(true),
+			RemoteVirtualNetwork: &network.SubResource{
+				ID: to.StringPtr(s.getHazelcastVnetId()),
+			},
+		}})
+	if createCustomerPeeringErr != nil {
+		return createCustomerPeeringErr
+	}
+	return nil
+}
+
+func (s AzurePeeringService) deleteOrphanPeerings() {
+	_, _ = s.HazelcastVnetPeeringClient.Delete(context.Background(),
+		s.HazelcastPeeringProperties.ResourceGroupName, s.HazelcastPeeringProperties.VnetName, s.getHazelcastPeeringName())
+	_, _ = s.CustomerVnetPeeringClient.Delete(context.Background(),
+		s.CustomerPeeringProperties.ResourceGroupName, s.CustomerPeeringProperties.VnetName, s.getCustomerPeeringName())
+}
+
+func (s AzurePeeringService) createRoleAssignment() error {
+	networkContributorRoleId := fmt.Sprintf("/subscriptions/%s/providers/Microsoft.Authorization/roleDefinitions/4d97b98b-1d4f-4787-a291-c67834d212e7",
+		s.CustomerPeeringProperties.SubscriptionId)
+	_, roleAssignmentErr := s.CustomerRoleAssignmentClient.Create(context.Background(), s.getCustomerVnetId(),
 		uuid.New().String(), authorization.RoleAssignmentCreateParameters{
 			Properties: &authorization.RoleAssignmentProperties{
 				RoleDefinitionID: &networkContributorRoleId,
-				PrincipalID:      servicePrincipal.ObjectID,
+				PrincipalID:      &s.ServicePrincipalObjectId,
 			},
 		})
 	if roleAssignmentErr != nil && roleAssignmentErr.(autorest.DetailedError).StatusCode != 409 {
 		return roleAssignmentErr
 	}
-
-	indicator.SetStep("Deleting Orphan Peerings...", 60)
-
-
-
-	indicator.SetStep("Customer Peering started...", 70)
-	hazelcastVnetId := s.getHazelcastVnetId(hazelcastPeeringProperties)
-	customerPeerName := uuid.New().String()
-	_, customerPeerErr := customerVnetPeeringClient.CreateOrUpdate(context.Background(),
-		customerProperties.ResourceGroupName, customerProperties.VnetName, customerPeerName, network.VirtualNetworkPeering{
-			VirtualNetworkPeeringPropertiesFormat: &network.VirtualNetworkPeeringPropertiesFormat{
-				AllowVirtualNetworkAccess: to.BoolPtr(true),
-				AllowForwardedTraffic:     to.BoolPtr(true),
-				RemoteVirtualNetwork: &network.SubResource{
-					ID: &hazelcastVnetId,
-				},
-			},
-			Name: &customerPeerName,
-		})
-	if customerPeerErr != nil && customerPeerErr.(autorest.DetailedError).Original.(*azure.ServiceError).Code != "AnotherPeeringAlreadyReferencesRemoteVnet" {
-		return customerPeerErr
- 	}
-
-	if customerPeerErr == nil {
-		marshal, _ := json.Marshal(struct {
-			PeeringConnectionId string `json:"peeringConnectionId"`
-			ClusterId           string `json:"clusterId"`
-		}{
-			customerPeerName,
-			customerProperties.ClusterId,
-		})
-		peeringEndpoint := fmt.Sprintf("%s/peerings", s.Client.BaseURL)
-		req, reqErr := http.NewRequest("POST", peeringEndpoint, bytes.NewBuffer(marshal))
-		if reqErr != nil {
-			return reqErr
-		}
-		req.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.Client.Token))
-		client := &http.Client{}
-		resp, respErr := client.Do(req)
-		if respErr != nil {
-			return respErr
-		}
-		fmt.Println(resp)
-	}
-
-	indicator.SetStep("Hazelcast Peering started...", 90)
-	hazelcastPeerName := uuid.New().String()
-	customerVnetId := s.getCustomerVnetId(customerProperties)
-	_, hazelcastPeeringErr := hazelcastVnetPeeringClient.CreateOrUpdate(context.Background(),
-		hazelcastPeeringProperties.ResourceGroupName, hazelcastPeeringProperties.VnetName, hazelcastPeerName, network.VirtualNetworkPeering{
-			VirtualNetworkPeeringPropertiesFormat: &network.VirtualNetworkPeeringPropertiesFormat{
-				AllowVirtualNetworkAccess: to.BoolPtr(true),
-				AllowForwardedTraffic:     to.BoolPtr(true),
-				RemoteVirtualNetwork: &network.SubResource{
-					ID: &customerVnetId,
-				},
-			},
-			Name: &hazelcastPeerName,
-		})
-	if hazelcastPeeringErr != nil && hazelcastPeeringErr.(autorest.DetailedError).Original.(*azure.ServiceError).Code != "AnotherPeeringAlreadyReferencesRemoteVnet" {
-		return hazelcastPeeringErr
-	}
 	return nil
 }
 
-func (s AzurePeeringService) getCustomerPeeringName(customerPeeringProperties *AzureCustomerPeeringProperties, pee) string {
-	return fmt.Sprintf("%s-to-%s", peeringProperties.VnetName, )
-}
-
-func (s AzurePeeringService) getCustomerVnetId(peeringProperties *AzureCustomerPeeringProperties) string {
-	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/VirtualNetworks/%s",
-		peeringProperties.SubscriptionId, peeringProperties.ResourceGroupName, peeringProperties.VnetName)
-}
-
-func (s AzurePeeringService) getHazelcastVnetId(peeringProperties *models.AzurePeeringProperties) string {
-	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/VirtualNetworks/%s",
-		peeringProperties.SubscriptionId, peeringProperties.ResourceGroupName, peeringProperties.VnetName)
-}
-
-func (s AzurePeeringService) getCustomerGraphAuthorizer() (autorest.Authorizer, error) {
-	azureEnv, azureEnvErr := azure.EnvironmentFromName("AzurePublicCloud")
-	if azureEnvErr != nil {
-		return nil, azureEnvErr
+func (s AzurePeeringService) createServicePrincipal() error {
+	servicePrincipal, createServicePrincipalErr := s.CustomerServicePrincipalClient.Create(context.Background(),
+		graphrbac.ServicePrincipalCreateParameters{
+			AppID:          &s.HazelcastPeeringProperties.AppRegistrationId,
+			AccountEnabled: to.BoolPtr(true),
+		})
+	if createServicePrincipalErr != nil {
+		if createServicePrincipalErr.(autorest.DetailedError).StatusCode != 409 {
+			return createServicePrincipalErr
+		}
+		servicePrincipalList, servicePrincipalListErr := s.CustomerServicePrincipalClient.List(
+			context.Background(), fmt.Sprintf("appId eq '%s'", s.HazelcastPeeringProperties.AppRegistrationId))
+		if servicePrincipalListErr != nil {
+			return servicePrincipalListErr
+		}
+		s.ServicePrincipalObjectId = *servicePrincipalList.Values()[0].ObjectID
+		return nil
 	}
-	return auth.NewAuthorizerFromCLIWithResource(azureEnv.GraphEndpoint)
+	time.Sleep(30 * time.Second)
+	s.ServicePrincipalObjectId = *servicePrincipal.ObjectID
+	return nil
 }
 
-func (s AzurePeeringService) getCustomerAuthorizer() (autorest.Authorizer, error) {
-	return auth.NewAuthorizerFromCLI()
+func (s AzurePeeringService) initHazelcastPeeringProperties() error {
+	hazelcastPeeringProperties, _, hazelcastPeeringPropertiesErr := s.Client.AzurePeering.GetProperties(context.Background(), &models.GetAzurePeeringPropertiesInput{
+		ClusterId: s.CustomerPeeringProperties.ClusterId,
+	})
+	if hazelcastPeeringPropertiesErr != nil {
+		return hazelcastPeeringPropertiesErr
+	}
+	s.HazelcastPeeringProperties = hazelcastPeeringProperties
+	return nil
 }
 
-func (s AzurePeeringService) getHazelcastMultiTenantAuthorizer(peeringProperties *models.AzurePeeringProperties, customerPeeringProperties AzureCustomerPeeringProperties) (autorest.Authorizer, error) {
+func (s AzurePeeringService) initClients() error {
 	env, envErr := azure.EnvironmentFromName("AzurePublicCloud")
 	if envErr != nil {
-		return nil, envErr
+		return envErr
 	}
 
-	oAuthConfig, oAuthConfigErr := adal.NewMultiTenantOAuthConfig(env.ActiveDirectoryEndpoint, peeringProperties.TenantId, []string{customerPeeringProperties.TenantId}, adal.OAuthOptions{})
-	if oAuthConfigErr != nil {
-		return nil, oAuthConfigErr
+	hazelcastOauthConfig, hazelcastOauthConfigErr := adal.NewMultiTenantOAuthConfig(env.ActiveDirectoryEndpoint,
+		s.HazelcastPeeringProperties.TenantId, []string{s.CustomerPeeringProperties.TenantId}, adal.OAuthOptions{})
+	if hazelcastOauthConfigErr != nil {
+		return hazelcastOauthConfigErr
 	}
 
-	token, envErr := adal.NewMultiTenantServicePrincipalToken(oAuthConfig, peeringProperties.AppRegistrationId, peeringProperties.AppRegistrationKey, env.ResourceManagerEndpoint)
-	return autorest.NewMultiTenantBearerAuthorizer(token), nil
+	hazelcastToken, hazelcastTokenErr := adal.NewMultiTenantServicePrincipalToken(hazelcastOauthConfig,
+		s.HazelcastPeeringProperties.AppRegistrationId, s.HazelcastPeeringProperties.AppRegistrationKey, env.ResourceManagerEndpoint)
+	if hazelcastTokenErr != nil {
+		return hazelcastOauthConfigErr
+	}
+
+	customerOauthConfig, customerOauthConfigErr := adal.NewMultiTenantOAuthConfig(env.ActiveDirectoryEndpoint,
+		s.CustomerPeeringProperties.TenantId, []string{s.HazelcastPeeringProperties.TenantId}, adal.OAuthOptions{})
+	if customerOauthConfigErr != nil {
+		return customerOauthConfigErr
+	}
+
+	customerToken, customerTokenErr := adal.NewMultiTenantServicePrincipalToken(customerOauthConfig,
+		s.HazelcastPeeringProperties.AppRegistrationId, s.HazelcastPeeringProperties.AppRegistrationKey, env.ResourceManagerEndpoint)
+	if customerTokenErr != nil {
+		return customerTokenErr
+	}
+
+	customerAuthorizer, customerAuthorizerErr := auth.NewAuthorizerFromCLI()
+	if customerAuthorizerErr != nil {
+		return customerAuthorizerErr
+	}
+
+	customerGraphAuthorizer, customerGraphAuthorizerErr := auth.NewAuthorizerFromCLIWithResource(env.GraphEndpoint)
+	if customerGraphAuthorizerErr != nil {
+		return customerGraphAuthorizerErr
+	}
+
+	s.HazelcastVnetPeeringClient = network.NewVirtualNetworkPeeringsClient(s.HazelcastPeeringProperties.SubscriptionId)
+	s.HazelcastVnetPeeringClient.Authorizer = autorest.NewMultiTenantBearerAuthorizer(hazelcastToken)
+	s.CustomerVnetPeeringClient = network.NewVirtualNetworkPeeringsClient(s.CustomerPeeringProperties.SubscriptionId)
+	s.CustomerVnetPeeringClient.Authorizer = autorest.NewMultiTenantBearerAuthorizer(customerToken)
+	s.CustomerServicePrincipalClient = graphrbac.NewServicePrincipalsClient(s.CustomerPeeringProperties.TenantId)
+	s.CustomerServicePrincipalClient.Authorizer = customerGraphAuthorizer
+	s.CustomerRoleAssignmentClient = authorization.NewRoleAssignmentsClient(s.CustomerPeeringProperties.SubscriptionId)
+	s.CustomerRoleAssignmentClient.Authorizer = customerAuthorizer
+
+	return nil
 }
 
-func (s AzurePeeringService) getCustomerMultiTenantAuthorizer(peeringProperties *models.AzurePeeringProperties, customerPeeringProperties AzureCustomerPeeringProperties) (autorest.Authorizer, error) {
-	env, envErr := azure.EnvironmentFromName("AzurePublicCloud")
-	if envErr != nil {
-		return nil, envErr
-	}
+func (s AzurePeeringService) getCustomerPeeringName() string {
+	return fmt.Sprintf("peering-to-%s", s.HazelcastPeeringProperties.VnetName)
+}
 
-	oAuthConfig, oAuthConfigErr := adal.NewMultiTenantOAuthConfig(env.ActiveDirectoryEndpoint, customerPeeringProperties.TenantId, []string{peeringProperties.TenantId}, adal.OAuthOptions{})
-	if oAuthConfigErr != nil {
-		return nil, oAuthConfigErr
-	}
+func (s AzurePeeringService) getHazelcastPeeringName() string {
+	return fmt.Sprintf("peering-to-%s", s.CustomerPeeringProperties.VnetName)
+}
 
-	token, envErr := adal.NewMultiTenantServicePrincipalToken(oAuthConfig, peeringProperties.AppRegistrationId, peeringProperties.AppRegistrationKey, env.ResourceManagerEndpoint)
-	return autorest.NewMultiTenantBearerAuthorizer(token), nil
+func (s AzurePeeringService) getCustomerVnetId() string {
+	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/VirtualNetworks/%s",
+		s.CustomerPeeringProperties.SubscriptionId, s.CustomerPeeringProperties.ResourceGroupName, s.CustomerPeeringProperties.VnetName)
+}
+
+func (s AzurePeeringService) getHazelcastVnetId() string {
+	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/VirtualNetworks/%s",
+		s.HazelcastPeeringProperties.SubscriptionId, s.HazelcastPeeringProperties.ResourceGroupName, s.HazelcastPeeringProperties.VnetName)
 }
