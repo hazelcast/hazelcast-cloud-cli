@@ -1,0 +1,55 @@
+package service
+
+import (
+	"context"
+	"fmt"
+	"github.com/hazelcast/hazelcast-cloud-cli/internal"
+	hazelcastcloud "github.com/hazelcast/hazelcast-cloud-sdk-go"
+	"github.com/hazelcast/hazelcast-cloud-sdk-go/models"
+	"google.golang.org/api/compute/v1"
+)
+
+type GcpPeeringService struct {
+	Client     *hazelcastcloud.Client
+	CustomerProperties *GcpCustomerPeeringProperties
+}
+
+type GcpCustomerPeeringProperties struct {
+	ClusterId string
+	ProjectId string
+	NetworkName string
+}
+
+func NewGcpPeeringService(client *hazelcastcloud.Client) GcpPeeringService {
+	return GcpPeeringService{
+		Client: client,
+	}
+}
+
+func (s GcpPeeringService) Create(customerProperties *GcpCustomerPeeringProperties) error {
+	hazelcastProperties := internal.Validate(s.Client.GcpPeering.GetProperties(context.Background(), &models.GetGcpPeeringPropertiesInput{
+		ClusterId: customerProperties.ClusterId,
+	})).(*models.GcpPeeringProperties)
+
+	computeService, computeServiceErr := compute.NewService(context.Background())
+	if computeServiceErr != nil {
+		return computeServiceErr
+	}
+
+	_, addPeeringErr := computeService.Networks.AddPeering(customerProperties.ProjectId, customerProperties.NetworkName, &compute.NetworksAddPeeringRequest{
+		Name:             fmt.Sprintf("%s-%s", hazelcastProperties.ProjectId, hazelcastProperties.NetworkName),
+		PeerNetwork:      "https://www.googleapis.com/compute/v1/projects/" + hazelcastProperties.ProjectId + "/global/networks/" + hazelcastProperties.NetworkName,
+		AutoCreateRoutes: true,
+	}).Do()
+	if addPeeringErr != nil {
+		return addPeeringErr
+	}
+
+	_ = internal.Validate(s.Client.GcpPeering.Accept(context.Background(), &models.AcceptGcpPeeringInput{
+		ClusterId:   customerProperties.ClusterId,
+		ProjectId:   customerProperties.ProjectId,
+		NetworkName: customerProperties.NetworkName,
+	}))
+
+	return nil
+}
