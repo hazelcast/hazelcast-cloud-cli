@@ -105,7 +105,7 @@ func (s *AzurePeeringService) notifyPeering() error {
 		s.customerPeeringProperties.ClusterId,
 		*s.hazelcastVnetPeering.Name,
 		s.customerPeeringProperties.VnetName,
-		(*s.customerVnetPeering.RemoteAddressSpace.AddressPrefixes)[0],
+		(*s.hazelcastVnetPeering.RemoteAddressSpace.AddressPrefixes)[0],
 	})
 	request, requestErr := http.NewRequest("POST", fmt.Sprintf("https://%s/peerings", s.client.BaseURL.Host), bytes.NewBuffer(jsonObject))
 	if requestErr != nil {
