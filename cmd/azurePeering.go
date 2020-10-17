@@ -31,13 +31,14 @@ var azurePeeringCreateCmd = &cobra.Command{
 		client := internal.NewClient()
 		indicator := util.NewLoadingIndicator("Azure Peering starting...", 100)
 		indicator.Start()
-		peeringCreateErr := service.NewAzurePeeringService(client,&service.AzureCustomerPeeringProperties{
+		azurePeeringService := service.NewAzurePeeringService(client,&service.AzureCustomerPeeringProperties{
 			ClusterId:         enterpriseClusterId,
 			TenantId:          azureTenantId,
 			SubscriptionId:    azureSubscriptionId,
 			ResourceGroupName: azureResourceGroupName,
 			VnetName:          azureVnetName,
-		}).Create(indicator)
+		})
+		peeringCreateErr := azurePeeringService.Create(indicator)
 		indicator.Stop()
 		if peeringCreateErr != nil {
 			color.Red("An error occurred. %s", peeringCreateErr)

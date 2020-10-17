@@ -10,13 +10,13 @@ import (
 )
 
 type GcpPeeringService struct {
-	Client     *hazelcastcloud.Client
+	Client             *hazelcastcloud.Client
 	CustomerProperties *GcpCustomerPeeringProperties
 }
 
 type GcpCustomerPeeringProperties struct {
-	ClusterId string
-	ProjectId string
+	ClusterId   string
+	ProjectId   string
 	NetworkName string
 }
 
@@ -38,7 +38,7 @@ func (s GcpPeeringService) Create(customerProperties *GcpCustomerPeeringProperti
 
 	_, addPeeringErr := computeService.Networks.AddPeering(customerProperties.ProjectId, customerProperties.NetworkName, &compute.NetworksAddPeeringRequest{
 		Name:             fmt.Sprintf("%s-%s", hazelcastProperties.ProjectId, hazelcastProperties.NetworkName),
-		PeerNetwork:      "https://www.googleapis.com/compute/v1/projects/" + hazelcastProperties.ProjectId + "/global/networks/" + hazelcastProperties.NetworkName,
+		PeerNetwork:      fmt.Sprintf("https://www.googleapis.com/compute/v1/projects/%s/global/networks/%s", hazelcastProperties.ProjectId, hazelcastProperties.NetworkName),
 		AutoCreateRoutes: true,
 	}).Do()
 	if addPeeringErr != nil {
