@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/Azure/azure-sdk-for-go/profiles/2019-03-01/authorization/mgmt/authorization"
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/graphrbac/graphrbac"
@@ -18,6 +19,7 @@ import (
 	hazelcastcloud "github.com/hazelcast/hazelcast-cloud-sdk-go"
 	"github.com/hazelcast/hazelcast-cloud-sdk-go/models"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -97,16 +99,21 @@ func (s *AzurePeeringService) notifyPeering() error {
 	jsonObject, _ := json.Marshal(struct {
 		ClusterId           string `json:"clusterId"`
 		PeeringConnectionId string `json:"peeringConnectionId"`
-		VnetCidr            string `json:"vnetCidr"`
+		VnetId              string `json:"vpcId"`
+		VnetCidr            string `json:"vpcCidr"`
 	}{
 		s.customerPeeringProperties.ClusterId,
 		*s.hazelcastVnetPeering.Name,
-		(*s.hazelcastVnetPeering.RemoteAddressSpace.AddressPrefixes)[0],
+		s.customerPeeringProperties.VnetName,
+		(*s.customerVnetPeering.RemoteAddressSpace.AddressPrefixes)[0],
 	})
-	request, requestErr := http.NewRequest("POST", fmt.Sprintf("%s/peerings", s.client.BaseURL), bytes.NewBuffer(jsonObject))
+	request, requestErr := http.NewRequest("POST", fmt.Sprintf("https://%s/peerings", s.client.BaseURL.Host), bytes.NewBuffer(jsonObject))
 	if requestErr != nil {
 		return requestErr
 	}
+	request.Header.Add("Content-Type", "application/json")
+	request.Header.Add("Accept", "application/json")
+	request.Header.Add("User-Agent", "hazelcast-cloud-sdk-go")
 	request.Header.Set("Authorization", fmt.Sprintf("Bearer %s", s.client.Token))
 	client := &http.Client{}
 	_, respErr := client.Do(request)
@@ -117,8 +124,9 @@ func (s *AzurePeeringService) notifyPeering() error {
 }
 
 func (s *AzurePeeringService) createHazelcastPeering() error {
+	hazelcastPeeringName :=  s.generatePeeringName()
 	createHazelcastPeering, createHazelcastPeeringErr := s.hazelcastVnetPeeringClient.CreateOrUpdate(context.Background(),
-		s.hazelcastPeeringProperties.ResourceGroupName, s.hazelcastPeeringProperties.VnetName, s.getHazelcastPeeringName(),
+		s.hazelcastPeeringProperties.ResourceGroupName, s.hazelcastPeeringProperties.VnetName, hazelcastPeeringName,
 		network.VirtualNetworkPeering{VirtualNetworkPeeringPropertiesFormat: &network.VirtualNetworkPeeringPropertiesFormat{
 			AllowVirtualNetworkAccess: to.BoolPtr(true),
 			AllowForwardedTraffic:     to.BoolPtr(true),
@@ -131,7 +139,7 @@ func (s *AzurePeeringService) createHazelcastPeering() error {
 	}
 	_ = createHazelcastPeering.WaitForCompletionRef(context.Background(), s.hazelcastVnetPeeringClient.Client)
 	hazelcastPeering, hazelcastPeeringErr := s.hazelcastVnetPeeringClient.Get(context.Background(),
-		s.hazelcastPeeringProperties.ResourceGroupName, s.hazelcastPeeringProperties.VnetName, s.getHazelcastPeeringName())
+		s.hazelcastPeeringProperties.ResourceGroupName, s.hazelcastPeeringProperties.VnetName, hazelcastPeeringName)
 	if hazelcastPeeringErr != nil {
 		return hazelcastPeeringErr
 	}
@@ -140,8 +148,9 @@ func (s *AzurePeeringService) createHazelcastPeering() error {
 }
 
 func (s *AzurePeeringService) createCustomerPeering() error {
+	customerPeeringName := s.generatePeeringName()
 	createCustomerPeering, createCustomerPeeringErr := s.customerVnetPeeringClient.CreateOrUpdate(context.Background(),
-		s.customerPeeringProperties.ResourceGroupName, s.customerPeeringProperties.VnetName, s.getCustomerPeeringName(),
+		s.customerPeeringProperties.ResourceGroupName, s.customerPeeringProperties.VnetName, customerPeeringName,
 		network.VirtualNetworkPeering{VirtualNetworkPeeringPropertiesFormat: &network.VirtualNetworkPeeringPropertiesFormat{
 			AllowVirtualNetworkAccess: to.BoolPtr(true),
 			AllowForwardedTraffic:     to.BoolPtr(true),
@@ -154,7 +163,7 @@ func (s *AzurePeeringService) createCustomerPeering() error {
 	}
 	_ = createCustomerPeering.WaitForCompletionRef(context.Background(), s.customerVnetPeeringClient.Client)
 	customerPeering, customerPeeringErr := s.customerVnetPeeringClient.Get(context.Background(),
-		s.customerPeeringProperties.ResourceGroupName, s.customerPeeringProperties.VnetName, s.getCustomerPeeringName())
+		s.customerPeeringProperties.ResourceGroupName, s.customerPeeringProperties.VnetName, customerPeeringName)
 	if customerPeeringErr != nil {
 		return customerPeeringErr
 	}
@@ -163,20 +172,25 @@ func (s *AzurePeeringService) createCustomerPeering() error {
 }
 
 func (s *AzurePeeringService) deleteOrphanPeerings() error {
-	deleteHazelcastPeering, deleteHazelcastPeeringErr := s.hazelcastVnetPeeringClient.Delete(context.Background(),
-		s.hazelcastPeeringProperties.ResourceGroupName, s.hazelcastPeeringProperties.VnetName, s.getHazelcastPeeringName())
-	if deleteHazelcastPeeringErr != nil {
-		return deleteHazelcastPeeringErr
+	customerPeeringList, customerPeeringListErr := s.customerVnetPeeringClient.List(context.Background(),
+		s.customerPeeringProperties.ResourceGroupName, s.customerPeeringProperties.VnetName)
+	if customerPeeringListErr != nil {
+		return customerPeeringListErr
 	}
-	a := deleteHazelcastPeering.WaitForCompletionRef(context.Background(), s.hazelcastVnetPeeringClient.Client)
-
-	deleteCustomerPeering, deleteCustomerPeeringErr := s.customerVnetPeeringClient.Delete(context.Background(),
-		s.customerPeeringProperties.ResourceGroupName, s.customerPeeringProperties.VnetName, s.getCustomerPeeringName())
-	if deleteCustomerPeeringErr != nil {
-		return deleteHazelcastPeeringErr
+	for _,customerPeer := range customerPeeringList.Values() {
+		if  *customerPeer.RemoteVirtualNetwork.ID == s.getHazelcastVnetId() {
+			if customerPeer.PeeringState != network.VirtualNetworkPeeringStateConnected {
+				deleteCustomerPeering, deleteCustomerPeeringErr := s.customerVnetPeeringClient.Delete(context.Background(),
+					s.customerPeeringProperties.ResourceGroupName, s.customerPeeringProperties.VnetName, *customerPeer.Name)
+				if deleteCustomerPeeringErr != nil {
+					return deleteCustomerPeeringErr
+				}
+				_ = deleteCustomerPeering.WaitForCompletionRef(context.Background(), s.customerVnetPeeringClient.Client)
+			} else {
+				return errors.New(fmt.Sprintf("You already have one connected peering connection named %s.", *customerPeer.Name))
+			}
+		}
 	}
-	b := deleteCustomerPeering.WaitForCompletionRef(context.Background(), s.customerVnetPeeringClient.Client)
-	fmt.Println(a, b)
 	return nil
 }
 
@@ -282,20 +296,16 @@ func (s *AzurePeeringService) initClients() error {
 	return nil
 }
 
-func (s *AzurePeeringService) getCustomerPeeringName() string {
-	return fmt.Sprintf("peering-to-%s", s.hazelcastPeeringProperties.VnetName)
-}
-
-func (s *AzurePeeringService) getHazelcastPeeringName() string {
-	return fmt.Sprintf("peering-to-%s", s.customerPeeringProperties.VnetName)
-}
-
 func (s *AzurePeeringService) getCustomerVnetId() string {
-	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/VirtualNetworks/%s",
+	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s",
 		s.customerPeeringProperties.SubscriptionId, s.customerPeeringProperties.ResourceGroupName, s.customerPeeringProperties.VnetName)
 }
 
 func (s *AzurePeeringService) getHazelcastVnetId() string {
-	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/VirtualNetworks/%s",
+	return fmt.Sprintf("/subscriptions/%s/resourceGroups/%s/providers/Microsoft.Network/virtualNetworks/%s",
 		s.hazelcastPeeringProperties.SubscriptionId, s.hazelcastPeeringProperties.ResourceGroupName, s.hazelcastPeeringProperties.VnetName)
+}
+
+func (s *AzurePeeringService) generatePeeringName() string {
+	return strings.Replace(strings.ToLower(uuid.New().String()), "-", "", -1)[0:8]
 }
