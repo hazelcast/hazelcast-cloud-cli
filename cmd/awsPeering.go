@@ -13,6 +13,7 @@ import (
 )
 
 var awsPeeringId string
+var awsRegion string
 var awsVpcId string
 var awsSubnetIds []string
 
@@ -32,6 +33,7 @@ var awsPeeringCreateCmd = &cobra.Command{
 		indicator.Start()
 		awsPeeringService := service.NewAwsPeeringService(client, &service.AwsCustomerPeeringProperties{
 			ClusterId: enterpriseClusterId,
+			Region:    awsRegion,
 			VpcId:     awsVpcId,
 			SubnetIds: awsSubnetIds,
 		})
@@ -96,10 +98,13 @@ func init() {
 	awsPeeringCreateCmd.Flags().StringVar(&enterpriseClusterId, "cluster-id", "", "id of the cluster")
 	_ = awsPeeringCreateCmd.MarkFlagRequired("cluster-id")
 
-	gcpPeeringCreateCmd.Flags().StringVar(&awsVpcId, "vpc-id", "", "id of the cluster")
-	_ = gcpPeeringCreateCmd.MarkFlagRequired("vpc-id")
+	awsPeeringCreateCmd.Flags().StringVar(&awsRegion, "region", "", "id of the cluster")
+	_ = awsPeeringCreateCmd.MarkFlagRequired("region")
 
-	gcpPeeringCreateCmd.Flags().StringSliceVar(&awsSubnetIds, "subnet-ids", []string{}, "id of the cluster")
-	_ = gcpPeeringCreateCmd.MarkFlagRequired("subnet-ids")
+	awsPeeringCreateCmd.Flags().StringVar(&awsVpcId, "vpc-id", "", "id of the cluster")
+	_ = awsPeeringCreateCmd.MarkFlagRequired("vpc-id")
+
+	awsPeeringCreateCmd.Flags().StringSliceVar(&awsSubnetIds, "subnet-ids", []string{}, "id of the cluster")
+	_ = awsPeeringCreateCmd.MarkFlagRequired("subnet-ids")
 
 }

@@ -2,6 +2,10 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/session"
+	"github.com/aws/aws-sdk-go/service/ec2"
 	"github.com/hazelcast/hazelcast-cloud-cli/util"
 	hazelcastcloud "github.com/hazelcast/hazelcast-cloud-sdk-go"
 	"github.com/hazelcast/hazelcast-cloud-sdk-go/models"
@@ -15,6 +19,7 @@ type AwsPeeringService struct {
 
 type AwsCustomerPeeringProperties struct {
 	ClusterId string
+	Region     string
 	VpcId     string
 	SubnetIds []string
 }
@@ -50,5 +55,15 @@ func (s *AwsPeeringService) initHazelcastPeeringProperties() error {
 }
 
 func (s *AwsPeeringService) initClients() error {
+	session, sessionErr := session.NewSession(&aws.Config{
+		Region: aws.String(s.customerPeeringProperties.Region)},
+	)
+	if sessionErr != nil {
+		return sessionErr
+	}
+	ec2Service:= ec2.New(session)
+	instances, instancesErr := ec2Service.DescribeInstances(&ec2.DescribeInstancesInput{
+	})
+	fmt.Println(instances, instancesErr)
 	return nil
 }

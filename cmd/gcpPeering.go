@@ -92,10 +92,10 @@ func init() {
 	gcpPeeringCreateCmd.Flags().StringVar(&enterpriseClusterId, "cluster-id", "", "id of the cluster")
 	_ = gcpPeeringCreateCmd.MarkFlagRequired("cluster-id")
 
-	gcpPeeringCreateCmd.Flags().StringVar(&gcpNetworkName, "network-name", "", "id of the cluster")
+	gcpPeeringCreateCmd.Flags().StringVar(&gcpNetworkName, "network-name", "", "name of the gcp network")
 	_ = gcpPeeringCreateCmd.MarkFlagRequired("network-name")
 
-	gcpPeeringCreateCmd.Flags().StringVar(&gcpProjectId, "project-id", "", "id of the cluster")
+	gcpPeeringCreateCmd.Flags().StringVar(&gcpProjectId, "project-id", "", "id of the gcp project")
 	_ = gcpPeeringCreateCmd.MarkFlagRequired("project-id")
 
 }

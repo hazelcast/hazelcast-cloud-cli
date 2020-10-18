@@ -99,13 +99,13 @@ func init() {
 
 	azurePeeringCreateCmd.Flags().StringVar(&enterpriseClusterId, "cluster-id", "", "id of the cluster")
 	_ = azurePeeringCreateCmd.MarkFlagRequired("cluster-id")
-	azurePeeringCreateCmd.Flags().StringVar(&azureTenantId, "tenant-id", "", "id of the cluster")
+	azurePeeringCreateCmd.Flags().StringVar(&azureTenantId, "tenant-id", "", "id of the azure tenant")
 	_ = azurePeeringCreateCmd.MarkFlagRequired("tenant-id")
-	azurePeeringCreateCmd.Flags().StringVar(&azureResourceGroupName, "resource-group", "", "id of the cluster")
+	azurePeeringCreateCmd.Flags().StringVar(&azureResourceGroupName, "resource-group", "", "name of the azure resource group")
 	_ = azurePeeringCreateCmd.MarkFlagRequired("resource-group")
-	azurePeeringCreateCmd.Flags().StringVar(&azureSubscriptionId, "subscription-id", "", "id of the cluster")
+	azurePeeringCreateCmd.Flags().StringVar(&azureSubscriptionId, "subscription-id", "", "id of the azure subscription")
 	_ = azurePeeringCreateCmd.MarkFlagRequired("subscription-id")
-	azurePeeringCreateCmd.Flags().StringVar(&azureVnetName, "vnet", "", "id of the cluster")
+	azurePeeringCreateCmd.Flags().StringVar(&azureVnetName, "vnet", "", "name of the azure vnet")
 	_ = azurePeeringCreateCmd.MarkFlagRequired("vnet")
 
 }

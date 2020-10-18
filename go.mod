@@ -10,6 +10,7 @@ require (
 	github.com/Azure/go-autorest/autorest/azure/auth v0.5.3
 	github.com/Azure/go-autorest/autorest/to v0.4.0
 	github.com/Azure/go-autorest/autorest/validation v0.3.0 // indirect
+	github.com/aws/aws-sdk-go v1.35.9
 	github.com/blang/semver/v4 v4.0.0
 	github.com/fatih/color v1.9.0
 	github.com/google/uuid v1.1.2
