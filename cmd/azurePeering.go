@@ -20,12 +20,13 @@ var azureVnetName string
 
 var azurePeeringCmd = &cobra.Command{
 	Use:     "azure-peering",
+	Short:   "This command allows you to make Azure Virtual Network Peering related actions.",
 	Aliases: []string{"azure"},
 }
 
 var azurePeeringCreateCmd = &cobra.Command{
 	Use:     "create",
-	Short:   "This command lists peerings for your Hazelcast Enterprise cluster.",
+	Short:   "This command creates Azure vNet Peering between your own vNet and your Enterprise Hazelcast cluster vNet.",
 	Example: "hzcloud azure-peering create --cluster-id=1 --project-id=2 --network-name=3",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := internal.NewClient()
@@ -50,7 +51,7 @@ var azurePeeringCreateCmd = &cobra.Command{
 
 var azurePeeringListCmd = &cobra.Command{
 	Use:     "list",
-	Short:   "This command lists peerings for your Hazelcast Enterprise cluster.",
+	Short:   "This command lists Azure vNet peerings on your Enterprise Hazelcast cluster.",
 	Example: "hzcloud azure-peering list --cluster-id=1",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := internal.NewClient()
@@ -73,7 +74,7 @@ var azurePeeringListCmd = &cobra.Command{
 
 var azurePeeringDeleteCmd = &cobra.Command{
 	Use:     "delete",
-	Short:   "This command lists peerings for your Hazelcast Enterprise cluster.",
+	Short:   "This command deletes Azure vNet peering from your Enterprise Hazelcast cluster.",
 	Example: "hzcloud azure-peering delete --peering-id=1",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := internal.NewClient()

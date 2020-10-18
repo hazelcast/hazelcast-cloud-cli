@@ -18,31 +18,32 @@ var gcpProjectId string
 
 var gcpPeeringCmd = &cobra.Command{
 	Use:     "gcp-peering",
+	Short:   "This command allows you to make Google Cloud Platform VPC Peering related actions.",
 	Aliases: []string{"gcp"},
 }
 
 var gcpPeeringCreateCmd = &cobra.Command{
 	Use:     "create",
-	Short:   "This command lists peerings for your Hazelcast Enterprise cluster.",
+	Short:   "This command creates GCP VPC Peering between your own VPC and your Enterprise Hazelcast cluster vNet.",
 	Example: "hzcloud gcp-peering create --cluster-id=1 --project-id=2 --network-name=3",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := internal.NewClient()
 		peeringCreateErr := service.NewGcpPeeringService(client).Create(&service.GcpCustomerPeeringProperties{
-			ClusterId: enterpriseClusterId,
-			ProjectId:  gcpProjectId,
+			ClusterId:   enterpriseClusterId,
+			ProjectId:   gcpProjectId,
 			NetworkName: gcpNetworkName,
 		})
 		if peeringCreateErr != nil {
 			color.Red("An error occurred. %s", peeringCreateErr)
- 		} else {
- 			color.Green("Peering successfully established.")
+		} else {
+			color.Green("Peering successfully established.")
 		}
 	},
 }
 
 var gcpPeeringListCmd = &cobra.Command{
 	Use:     "list",
-	Short:   "This command lists peerings for your Hazelcast Enterprise cluster.",
+	Short:   "This command lists GCP VPC peerings on your Enterprise Hazelcast cluster.",
 	Example: "hzcloud gcp-peering list --cluster-id=1",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := internal.NewClient()
@@ -65,7 +66,7 @@ var gcpPeeringListCmd = &cobra.Command{
 
 var gcpPeeringDeleteCmd = &cobra.Command{
 	Use:     "delete",
-	Short:   "This command lists peerings for your Hazelcast Enterprise cluster.",
+	Short:   "This command deletes GCP VPC peering from your Enterprise Hazelcast cluster.",
 	Example: "hzcloud gcp-peering delete --peering-id=1",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := internal.NewClient()
@@ -94,7 +95,7 @@ func init() {
 	gcpPeeringCreateCmd.Flags().StringVar(&gcpNetworkName, "network-name", "", "id of the cluster")
 	_ = gcpPeeringCreateCmd.MarkFlagRequired("network-name")
 
-		gcpPeeringCreateCmd.Flags().StringVar(&gcpProjectId, "project-id", "", "id of the cluster")
+	gcpPeeringCreateCmd.Flags().StringVar(&gcpProjectId, "project-id", "", "id of the cluster")
 	_ = gcpPeeringCreateCmd.MarkFlagRequired("project-id")
 
 }
