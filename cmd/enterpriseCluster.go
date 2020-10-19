@@ -60,7 +60,7 @@ var enterpriseClusterGetCmd = &cobra.Command{
 	Run: func(cmd *cobra.Command, args []string) {
 		client := internal.NewClient()
 		cluster := internal.Validate(client.EnterpriseCluster.Get(context.Background(), &models.GetEnterpriseClusterInput{
-			ClusterId: starterClusterId,
+			ClusterId: enterpriseClusterId,
 		})).(*models.Cluster)
 		util.Print(util.PrintRequest{
 			Data:       *cluster,
