@@ -26,7 +26,7 @@ func NewClient() *hazelcastcloud.Client {
 		os.Exit(1)
 	}
 
-	client := Validate(hazelcastcloud.NewFromCredentials(apiKey, apiSecret, hazelcastcloud.OptionEndpoint("https://optimusprime.test.hazelcast.cloud/api/v1")))
+	client := Validate(hazelcastcloud.NewFromCredentials(apiKey, apiSecret))
 	hazelcastCloudClient = client.(*hazelcastcloud.Client)
 	return hazelcastCloudClient
 }
