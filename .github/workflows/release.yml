@@ -72,7 +72,7 @@ jobs:
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
-        run: go build -ldflags "-X github.com/${{ env.organization }}/hazelcast-cloud-cli/internal.Version=${{ needs.release.outputs.version }} -X github.com/${{ env.organization }}/hazelcast-cloud-cli/internal.Distribution=DIRECT" -o hzcloud-${{ matrix.GOOS }}-${{ matrix.GOARCH }}
+        run: go build -ldflags "-w -s -X github.com/${{ env.organization }}/hazelcast-cloud-cli/internal.Version=${{ needs.release.outputs.version }} -X github.com/${{ env.organization }}/hazelcast-cloud-cli/internal.Distribution=DIRECT" -o hzcloud-${{ matrix.GOOS }}-${{ matrix.GOARCH }}
 
       - name: Upload ${{ matrix.os }} Binary
         uses: actions/upload-release-asset@v1.0.1

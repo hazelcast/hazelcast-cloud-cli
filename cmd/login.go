@@ -1,28 +1,14 @@
 package cmd
 
 import (
-	"errors"
-	"github.com/AlecAivazis/survey/v2"
+	"bufio"
+	"fmt"
 	"github.com/hazelcast/hazelcast-cloud-cli/internal"
 	"github.com/spf13/cobra"
+	"golang.org/x/crypto/ssh/terminal"
+	"os"
 	"strings"
-)
-
-// Flags
-var (
-	apiKey    string
-	apiSecret string
-)
-
-// Prompts
-var (
-	apiKeyQuestion = &survey.Password{
-		Message: "Api Key:",
-	}
-
-	apiSecretQuestion = &survey.Password{
-		Message: "Api Secret:",
-	}
+	"syscall"
 )
 
 // loginCmd represents the login command
@@ -31,33 +17,14 @@ var loginCmd = &cobra.Command{
 	Aliases: []string{"login"},
 	Short:   "This command logins you to Hazelcast Cloud with api-key and api-secret.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		icons := survey.WithIcons(func(icons *survey.IconSet) {
-			icons.Question.Text = "- "
-		})
-
-		apiKeyQuestionErr := survey.AskOne(apiKeyQuestion, &apiKey, icons)
-
-		if apiKeyQuestionErr != nil {
-			return apiKeyQuestionErr
-		}
-
-		if len(strings.TrimSpace(apiKey)) == 0 {
-			return errors.New("You must specify a valid api key to log in")
-		}
-
-		apiSecretQuestionErr := survey.AskOne(apiSecretQuestion, &apiSecret, icons)
-
-		if apiSecretQuestionErr != nil {
-			return apiSecretQuestionErr
-		}
-
-		if len(strings.TrimSpace(apiSecret)) == 0 {
-			return errors.New("You must specify a valid api secret to log in")
-		}
-
+		reader := bufio.NewReader(os.Stdin)
+		fmt.Print("Api Key: ")
+		apiKey, _ := reader.ReadString('\n')
+		fmt.Print("Api Secret: ")
+		apiSecret, _ := terminal.ReadPassword(syscall.Stdin)
 		configService := internal.NewConfigService()
-		configService.Set(internal.ApiKey, apiKey)
-		configService.Set(internal.ApiSecret, apiSecret)
+		configService.Set(internal.ApiKey, strings.TrimSpace(apiKey))
+		configService.Set(internal.ApiSecret, strings.TrimSpace(string(apiSecret)))
 
 		return nil
 	},

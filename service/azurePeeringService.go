@@ -204,9 +204,14 @@ func (s *AzurePeeringService) createRoleAssignment() error {
 				PrincipalID:      s.servicePrincipal.ObjectID,
 			},
 		})
-	if roleAssignmentErr != nil && roleAssignmentErr.(autorest.DetailedError).StatusCode != 409 {
-		return roleAssignmentErr
+	if roleAssignmentErr != nil {
+		if roleAssignmentErr.(autorest.DetailedError).StatusCode != 409 {
+			return roleAssignmentErr
+		} else {
+			return nil
+		}
 	}
+	time.Sleep(20 * time.Second)
 	return nil
 }
 
@@ -228,7 +233,7 @@ func (s *AzurePeeringService) createServicePrincipal() error {
 		s.servicePrincipal = servicePrincipalList.Values()[0]
 		return nil
 	}
-	time.Sleep(30 * time.Second)
+	time.Sleep(60 * time.Second)
 	s.servicePrincipal = servicePrincipal
 	return nil
 }

@@ -1,14 +1,10 @@
 package internal
 
 import (
+	"encoding/json"
 	"fmt"
-	"github.com/spf13/viper"
+	"io/ioutil"
 	"os"
-)
-
-const (
-	ConfigType string = "yaml"
-	ConfigName string = "config"
 )
 
 type ConfigKey string
@@ -20,71 +16,63 @@ const (
 )
 
 type ConfigService interface {
-	CreateConfig()
-	Set(key ConfigKey, value interface{})
-	GetString(key ConfigKey) string
-	GetInt64(key ConfigKey) int64
-	GetFullConfigPath() string
+	Set(key ConfigKey, value string)
+	Get(key ConfigKey) string
 }
 
 type configService struct {
 	ConfigPath     string
-	ConfigFile     string
 	FullConfigPath string
 }
 
 func NewConfigService() ConfigService {
-	homeDir, _ := os.UserHomeDir()
-	return NewConfigServiceWith(homeDir)
-}
-
-func NewConfigServiceWith(homeDir string) ConfigService {
+	homeDir, homeDirErr := os.UserHomeDir()
+	if homeDirErr != nil {
+		panic(homeDirErr)
+	}
+	configFile := "config.json"
 	configPath := fmt.Sprintf("%s/.hazelcastcloud", homeDir)
-	configFile := "config.yaml"
 	fullConfigPath := fmt.Sprintf("%s/%s", configPath, configFile)
 
 	return &configService{
 		ConfigPath:     configPath,
-		ConfigFile:     configFile,
 		FullConfigPath: fullConfigPath,
 	}
 }
 
-func (c configService) CreateConfig() {
-	v := viper.New()
-	v.SetConfigType(ConfigType)
-	v.SetConfigName(ConfigName)
-	v.AddConfigPath(c.ConfigPath)
+func (c configService) getConfig() map[string]string {
+	readFile, readFileErr := os.OpenFile(c.FullConfigPath, os.O_RDONLY|os.O_CREATE, 0644)
+	if readFileErr != nil {
+		panic(readFileErr)
+	}
 
-	if readErr := v.ReadInConfig(); readErr != nil {
-		if _, ok := readErr.(viper.ConfigFileNotFoundError); ok {
-			_, statErr := os.Stat(c.FullConfigPath)
-			if !os.IsExist(statErr) {
-				_ = os.Mkdir(c.ConfigPath, 0755)
-				_, _ = os.Create(c.FullConfigPath)
-			}
-		}
+	readData, readDataErr := ioutil.ReadAll(readFile)
+	if readDataErr != nil {
+		panic(readDataErr)
+	}
+
+	jsonMap := make(map[string]string)
+	unmarshallErr := json.Unmarshal(readData, &jsonMap)
+	if unmarshallErr != nil && len(readData) != 0 {
+		panic(unmarshallErr)
+	}
+
+	return jsonMap
+}
+
+func (c configService) Set(key ConfigKey, value string) {
+	config := c.getConfig()
+	config[string(key)] = value
+	configJson, marshallErr := json.Marshal(config)
+	if marshallErr != nil {
+		panic(marshallErr)
+	}
+	writeFileErr := ioutil.WriteFile(c.FullConfigPath, configJson, 0644)
+	if writeFileErr != nil {
+		panic(writeFileErr)
 	}
 }
 
-func (c configService) Set(key ConfigKey, value interface{}) {
-	viper.AddConfigPath(c.ConfigPath)
-	viper.Set(string(key), value)
-	_ = viper.WriteConfig()
-}
-
-func (c configService) GetString(key ConfigKey) string {
-	viper.AddConfigPath(c.ConfigPath)
-	_ = viper.ReadInConfig()
-	return viper.GetString(string(key))
-}
-
-func (c configService) GetInt64(key ConfigKey) int64 {
-	viper.AddConfigPath(c.ConfigPath)
-	_ = viper.ReadInConfig()
-	return viper.GetInt64(string(key))
-}
-
-func (c configService) GetFullConfigPath() string {
-	return c.FullConfigPath
+func (c configService) Get(key ConfigKey) string {
+	return c.getConfig()[string(key)]
 }

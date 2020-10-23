@@ -15,8 +15,8 @@ func NewClient() *hazelcastcloud.Client {
 	var apiSecret = os.Getenv("HZ_CLOUD_API_SECRET")
 	if len(strings.TrimSpace(apiKey)) == 0 || len(strings.TrimSpace(apiSecret)) == 0 {
 		configService := NewConfigService()
-		apiKey = configService.GetString("api-key")
-		apiSecret = configService.GetString("api-secret")
+		apiKey = configService.Get("api-key")
+		apiSecret = configService.Get("api-secret")
 	}
 
 	if len(strings.TrimSpace(apiKey)) == 0 || len(strings.TrimSpace(apiSecret)) == 0 {
@@ -26,7 +26,7 @@ func NewClient() *hazelcastcloud.Client {
 		os.Exit(1)
 	}
 
-	client := Validate(hazelcastcloud.NewFromCredentials(apiKey, apiSecret))
+	client := Validate(hazelcastcloud.NewFromCredentials(apiKey, apiSecret, hazelcastcloud.OptionEndpoint("https://optimusprime.test.hazelcast.cloud/api/v1")))
 	hazelcastCloudClient = client.(*hazelcastcloud.Client)
 	return hazelcastCloudClient
 }
