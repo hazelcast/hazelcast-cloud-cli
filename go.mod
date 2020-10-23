@@ -22,4 +22,4 @@ require (
 	google.golang.org/api v0.33.0
 )
 
-replace github.com/hazelcast/hazelcast-cloud-sdk-go v1.0.1 => github.com/yunussandikci/hazelcast-cloud-sdk-go v1.1.7
+replace github.com/hazelcast/hazelcast-cloud-sdk-go v1.0.1 => github.com/yunussandikci/hazelcast-cloud-sdk-go v1.1.9

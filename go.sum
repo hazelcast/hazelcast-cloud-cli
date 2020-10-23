@@ -336,8 +336,8 @@ github.com/yuin/goldmark v1.1.25/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9de
 github.com/yuin/goldmark v1.1.27/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.1.32/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
 github.com/yuin/goldmark v1.2.1/go.mod h1:3hX8gzYuyVAZsxl0MRgGTJEmQBFcNTphYh9decYSb74=
-github.com/yunussandikci/hazelcast-cloud-sdk-go v1.1.7 h1:Cp/pAtRvjzI+mS++hPXao0Yr1qmdv/jSpm/DJg9EJ0g=
-github.com/yunussandikci/hazelcast-cloud-sdk-go v1.1.7/go.mod h1:3Iane/AnU7k1x2+t4C9BrE6CTGU/T/3i79DVFLbJLkg=
+github.com/yunussandikci/hazelcast-cloud-sdk-go v1.1.9 h1:JIvsSSNt4YU1deeKKWXbb5Zd77VZbAz+IX7srY5uFdY=
+github.com/yunussandikci/hazelcast-cloud-sdk-go v1.1.9/go.mod h1:3Iane/AnU7k1x2+t4C9BrE6CTGU/T/3i79DVFLbJLkg=
 go.etcd.io/bbolt v1.3.2/go.mod h1:IbVyRI1SCnLcuJnV2u8VeU0CEYM7e686BmAb1XKL+uU=
 go.opencensus.io v0.21.0/go.mod h1:mSImk1erAIZhrmZN+AvHh14ztQfjbGwt4TtuofqLduU=
 go.opencensus.io v0.22.0 h1:C9hSCOW830chIVkdja34wa6Ky+IzWllkUinR+BtRZd4=

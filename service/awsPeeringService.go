@@ -65,6 +65,7 @@ func (s *AwsPeeringService) Create(indicator *util.LoadingIndicator) error {
 		return vpcCidrErr
 	}
 	_, _, acceptErr := s.client.AwsPeering.Accept(context.Background(), &models.AcceptAwsPeeringInput{
+		ClusterId:           s.customerPeeringProperties.ClusterId,
 		VpcId:               s.customerPeeringProperties.VpcId,
 		VpcCidr:             vpcCidr,
 		PeeringConnectionId: peeringConnectionId,
@@ -151,14 +152,10 @@ func (s *AwsPeeringService) createRoute(peeringConnectionId string) error {
 	}
 
 	for _, routeTableId := range routeTableIds {
-		_, deleteRouteErr := s.ec2.DeleteRoute(&ec2.DeleteRouteInput{
+		s.ec2.DeleteRoute(&ec2.DeleteRouteInput{
 			DestinationCidrBlock: aws.String(s.hazelcastPeeringProperties.VpcCidr),
 			RouteTableId:         aws.String(routeTableId),
 		})
-
-		if deleteRouteErr != nil {
-			return deleteRouteErr
-		}
 
 		_, createRouteErr := s.ec2.CreateRoute(&ec2.CreateRouteInput{
 			DestinationCidrBlock:   aws.String(s.hazelcastPeeringProperties.VpcCidr),
