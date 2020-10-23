@@ -13,7 +13,7 @@ require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/fatih/color v1.9.0
 	github.com/google/uuid v1.1.2
-	github.com/hazelcast/hazelcast-cloud-sdk-go v1.1.0
+	github.com/hazelcast/hazelcast-cloud-sdk-go v1.1.1
 	github.com/jedib0t/go-pretty/v6 v6.0.5
 	github.com/spf13/cobra v1.1.0
 	golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0

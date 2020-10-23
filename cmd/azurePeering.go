@@ -58,10 +58,10 @@ var azurePeeringListCmd = &cobra.Command{
 		peerings := internal.Validate(client.AzurePeering.List(context.Background(), &models.ListAzurePeeringsInput{
 			ClusterId: enterpriseClusterId,
 		})).(*[]models.AzurePeering)
-		header := table.Row{"#", "Peering Id"}
+		header := table.Row{"#", "Peering Id", "vNet Name", "vNet Cidr"}
 		rows := []table.Row{}
 		for k, peering := range *peerings {
-			rows = append(rows, table.Row{k + 1, peering.Id})
+			rows = append(rows, table.Row{k + 1, peering.Id, peering.VpcId, peering.VpcCidr})
 		}
 		util.Print(util.PrintRequest{
 			Data:       peerings,

@@ -114,7 +114,6 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 ## ⭐️ Built With
 
 * [Cobra](https://github.com/spf13/cobra) - A Commander for modern Go CLI interactions
-* [Viper](https://github.com/spf13/viper) - Go configuration with fangs
 * [Color](https://github.com/fatih/color) - Color package for Go
 * [Go-Pretty](https://github.com/jedib0t/go-pretty) - Pretty print tables and more in Go
 

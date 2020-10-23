@@ -281,12 +281,12 @@ func (s *AzurePeeringService) initClients() error {
 
 	customerAuthorizer, customerAuthorizerErr := auth.NewAuthorizerFromCLI()
 	if customerAuthorizerErr != nil {
-		return customerAuthorizerErr
+		return fmt.Errorf("you need to have Azure CLI installed and execute `az login` command successfully. For more information https://docs.cloud.hazelcast.com/docs/azure-vnet-peering . Azure Error:%s", customerAuthorizerErr)
 	}
 
 	customerGraphAuthorizer, customerGraphAuthorizerErr := auth.NewAuthorizerFromCLIWithResource(env.GraphEndpoint)
 	if customerGraphAuthorizerErr != nil {
-		return customerGraphAuthorizerErr
+		return fmt.Errorf("you need to have Azure CLI installed and execute `az login` command successfully. For more information https://docs.cloud.hazelcast.com/docs/azure-vnet-peering . Azure Error:%s", customerGraphAuthorizerErr)
 	}
 
 	s.hazelcastVnetPeeringClient = network.NewVirtualNetworkPeeringsClient(s.hazelcastPeeringProperties.SubscriptionId)
