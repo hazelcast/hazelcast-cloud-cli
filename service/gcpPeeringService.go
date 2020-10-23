@@ -33,7 +33,7 @@ func (s GcpPeeringService) Create(customerProperties *GcpCustomerPeeringProperti
 
 	computeService, computeServiceErr := compute.NewService(context.Background())
 	if computeServiceErr != nil {
-		return computeServiceErr
+		return fmt.Errorf("you need to have GOOGLE_APPLICATION_CREDENTIALS environment variable set in order to perform this action. For more information https://docs.cloud.hazelcast.com/docs/gcp-vpc-peering . GCP Error:%s", computeServiceErr)
 	}
 
 	_, addPeeringErr := computeService.Networks.AddPeering(customerProperties.ProjectId, customerProperties.NetworkName, &compute.NetworksAddPeeringRequest{
