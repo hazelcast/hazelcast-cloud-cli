@@ -15,8 +15,8 @@ func NewClient() *hazelcastcloud.Client {
 	var apiSecret = os.Getenv("HZ_CLOUD_API_SECRET")
 	if len(strings.TrimSpace(apiKey)) == 0 || len(strings.TrimSpace(apiSecret)) == 0 {
 		configService := NewConfigService()
-		apiKey = configService.GetString("api-key")
-		apiSecret = configService.GetString("api-secret")
+		apiKey = configService.Get("api-key")
+		apiSecret = configService.Get("api-secret")
 	}
 
 	if len(strings.TrimSpace(apiKey)) == 0 || len(strings.TrimSpace(apiSecret)) == 0 {

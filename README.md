@@ -11,7 +11,7 @@
 </p>
 
 > Hazelcast Cloud CLI is known as `hzcloud` is a command line tool to make actions on Hazelcast Cloud easily. Hazelcast Cloud offers the leading in-memory computing platform, Hazelcast IMDG, as a fully managed service that integrates with your existing virtual private cloud.
- <img alt="Screenshot" src="https://abload.de/img/github-hzcloud-terminxmjuy.png" />
+ <img alt="Screenshot" src="https://user-images.githubusercontent.com/1237982/97022384-b901a780-155c-11eb-87b4-5f4e945a0f1c.png" />
 
 ## Installing `hzcloud`
 ### Using a Package Manager (Homebrew)
@@ -114,7 +114,6 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 ## ⭐️ Built With
 
 * [Cobra](https://github.com/spf13/cobra) - A Commander for modern Go CLI interactions
-* [Viper](https://github.com/spf13/viper) - Go configuration with fangs
 * [Color](https://github.com/fatih/color) - Color package for Go
 * [Go-Pretty](https://github.com/jedib0t/go-pretty) - Pretty print tables and more in Go
 

@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -119,11 +120,12 @@ func (v UpdateService) getExecutablePath() (string, error) {
 	return executablePath, nil
 }
 func (v UpdateService) isVersionCheckNeeded() bool {
-	lastVersionCheckTS := v.ConfigService.GetInt64(LastVersionCheckTime)
-	lastVersionCheckTime := time.Unix(lastVersionCheckTS, 0)
+	lastVersionCheckTS := v.ConfigService.Get(LastVersionCheckTime)
+	intLastVersionCheckTS, _ := strconv.ParseInt(lastVersionCheckTS, 10, 64)
+	lastVersionCheckTime := time.Unix(intLastVersionCheckTS, 0)
 	isNeeded := time.Since(lastVersionCheckTime).Hours() > 24
 	if isNeeded {
-		v.ConfigService.Set(LastVersionCheckTime, time.Now().Unix())
+		v.ConfigService.Set(LastVersionCheckTime, strconv.FormatInt(time.Now().Unix(), 10))
 	}
 	return isNeeded
 }

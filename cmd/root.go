@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/hazelcast/hazelcast-cloud-cli/internal"
 	"github.com/spf13/cobra"
 	"os"
 )
@@ -23,5 +22,4 @@ func Execute() {
 
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&outputStyle, "output", "o", "default", "--output json")
-	internal.NewConfigService().CreateConfig()
 }

@@ -6,8 +6,8 @@ import (
 )
 
 func main() {
+	cmd.Execute()
 	updaterService := internal.NewUpdaterService()
 	updaterService.Clean()
-	cmd.Execute()
 	updaterService.Check(false)
 }
