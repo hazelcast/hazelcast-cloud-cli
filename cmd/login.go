@@ -8,7 +8,6 @@ import (
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
 	"strings"
-	"syscall"
 )
 
 // loginCmd represents the login command
@@ -21,7 +20,7 @@ var loginCmd = &cobra.Command{
 		fmt.Print("Api Key: ")
 		apiKey, _ := reader.ReadString('\n')
 		fmt.Print("Api Secret: ")
-		apiSecret, _ := terminal.ReadPassword(syscall.Stdin)
+		apiSecret, _ := terminal.ReadPassword(int(os.Stdin.Fd()))
 		configService := internal.NewConfigService()
 		configService.Set(internal.ApiKey, strings.TrimSpace(apiKey))
 		configService.Set(internal.ApiSecret, strings.TrimSpace(string(apiSecret)))
