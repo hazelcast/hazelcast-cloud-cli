@@ -13,6 +13,9 @@ var hazelcastCloudClient *hazelcastcloud.Client
 func NewClient() *hazelcastcloud.Client {
 	var apiKey = os.Getenv("HZ_CLOUD_API_KEY")
 	var apiSecret = os.Getenv("HZ_CLOUD_API_SECRET")
+	var apiUrl = os.Getenv("HZ_CLOUD_API_URL")
+	var client interface{}
+
 	if len(strings.TrimSpace(apiKey)) == 0 || len(strings.TrimSpace(apiSecret)) == 0 {
 		configService := NewConfigService()
 		apiKey = configService.Get("api-key")
@@ -26,7 +29,12 @@ func NewClient() *hazelcastcloud.Client {
 		os.Exit(1)
 	}
 
-	client := Validate(hazelcastcloud.NewFromCredentials(apiKey, apiSecret))
+	if len(strings.TrimSpace(apiUrl)) != 0 {
+		client = Validate(hazelcastcloud.NewFromCredentials(apiKey, apiSecret, hazelcastcloud.OptionEndpoint(apiUrl)))
+	} else {
+		client = Validate(hazelcastcloud.NewFromCredentials(apiKey, apiSecret))
+	}
+
 	hazelcastCloudClient = client.(*hazelcastcloud.Client)
 	return hazelcastCloudClient
 }
