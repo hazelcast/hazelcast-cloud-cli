@@ -41,6 +41,7 @@ func NewConfigService() ConfigService {
 }
 
 func (c configService) getConfig() map[string]string {
+	_ = os.Mkdir(c.ConfigPath, 0777)
 	readFile, readFileErr := os.OpenFile(c.FullConfigPath, os.O_RDONLY|os.O_CREATE, 0644)
 	if readFileErr != nil {
 		panic(readFileErr)
