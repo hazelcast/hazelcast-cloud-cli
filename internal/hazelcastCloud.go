@@ -42,7 +42,7 @@ func NewClient() *hazelcastcloud.Client {
 func Validate(a interface{}, b *hazelcastcloud.Response, c error) interface{} {
 	if c != nil {
 		if reflect.TypeOf(c) == reflect.TypeOf(&hazelcastcloud.ErrorResponse{}) {
-			color.Red("Message:%s CorrelationId:%s", c.(*hazelcastcloud.ErrorResponse).Message,
+			color.Red("Message:%s\nCorrelationId:%s", c.(*hazelcastcloud.ErrorResponse).Message,
 				c.(*hazelcastcloud.ErrorResponse).CorrelationId)
 		} else {
 			color.Red(c.Error())

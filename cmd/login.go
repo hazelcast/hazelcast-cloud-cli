@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	"bufio"
 	"fmt"
+	"github.com/fatih/color"
 	"github.com/hazelcast/hazelcast-cloud-cli/internal"
+	hazelcastcloud "github.com/hazelcast/hazelcast-cloud-sdk-go"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
@@ -16,15 +17,30 @@ var loginCmd = &cobra.Command{
 	Aliases: []string{"login"},
 	Short:   "This command logins you to Hazelcast Cloud with api-key and api-secret.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		reader := bufio.NewReader(os.Stdin)
-		fmt.Print("Api Key: ")
-		apiKey, _ := reader.ReadString('\n')
-		fmt.Print("Api Secret: ")
+		fmt.Print("- API Key: ")
+		apiKey, _ := terminal.ReadPassword(int(os.Stdin.Fd()))
+		fmt.Printf("\r\033[K")
+		fmt.Print("- API Secret: ")
 		apiSecret, _ := terminal.ReadPassword(int(os.Stdin.Fd()))
-		configService := internal.NewConfigService()
-		configService.Set(internal.ApiKey, strings.TrimSpace(apiKey))
-		configService.Set(internal.ApiSecret, strings.TrimSpace(string(apiSecret)))
+		fmt.Printf("\r\033[K")
+		apiKeyString := strings.TrimSpace(string(apiKey))
+		apiSecretString := strings.TrimSpace(string(apiSecret))
 
+		apiUrl := os.Getenv("HZ_CLOUD_API_URL")
+		var clientErr error
+		if len(apiUrl) != 0 {
+			_, _, clientErr = hazelcastcloud.NewFromCredentials(apiKeyString, apiSecretString,
+				hazelcastcloud.OptionEndpoint(apiUrl))
+		} else {
+			_, _, clientErr = hazelcastcloud.NewFromCredentials(apiKeyString, apiSecretString)
+		}
+		internal.Validate(nil, nil, clientErr)
+		if clientErr == nil {
+			configService := internal.NewConfigService()
+			configService.Set(internal.ApiKey, apiKeyString)
+			configService.Set(internal.ApiSecret, apiSecretString)
+			color.Green("Login successful.")
+		}
 		return nil
 	},
 }
