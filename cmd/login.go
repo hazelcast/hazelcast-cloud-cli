@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"github.com/fatih/color"
 	"github.com/hazelcast/hazelcast-cloud-cli/internal"
-	hazelcastcloud "github.com/hazelcast/hazelcast-cloud-sdk-go"
 	"github.com/spf13/cobra"
 	"golang.org/x/crypto/ssh/terminal"
 	"os"
@@ -26,16 +25,9 @@ var loginCmd = &cobra.Command{
 		apiKeyString := strings.TrimSpace(string(apiKey))
 		apiSecretString := strings.TrimSpace(string(apiSecret))
 
-		apiUrl := os.Getenv("HZ_CLOUD_API_URL")
-		var clientErr error
-		if len(apiUrl) != 0 {
-			_, _, clientErr = hazelcastcloud.NewFromCredentials(apiKeyString, apiSecretString,
-				hazelcastcloud.OptionEndpoint(apiUrl))
-		} else {
-			_, _, clientErr = hazelcastcloud.NewFromCredentials(apiKeyString, apiSecretString)
-		}
-		internal.Validate(nil, nil, clientErr)
-		if clientErr == nil {
+		loginResult, response, loginErr := internal.Login(apiKeyString, apiSecretString)
+		internal.Validate(loginResult, response, loginErr)
+		if loginErr == nil {
 			configService := internal.NewConfigService()
 			configService.Set(internal.ApiKey, apiKeyString)
 			configService.Set(internal.ApiSecret, apiSecretString)
