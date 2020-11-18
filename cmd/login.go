@@ -16,10 +16,10 @@ var loginCmd = &cobra.Command{
 	Aliases: []string{"login"},
 	Short:   "This command logins you to Hazelcast Cloud with api-key and api-secret.",
 	RunE: func(cmd *cobra.Command, args []string) error {
-		fmt.Print("- API Key: ")
+		fmt.Print("API Key: ")
 		apiKey, _ := terminal.ReadPassword(int(os.Stdin.Fd()))
 		fmt.Printf("\r\033[K")
-		fmt.Print("- API Secret: ")
+		fmt.Print("API Secret: ")
 		apiSecret, _ := terminal.ReadPassword(int(os.Stdin.Fd()))
 		fmt.Printf("\r\033[K")
 		apiKeyString := strings.TrimSpace(string(apiKey))
@@ -31,7 +31,7 @@ var loginCmd = &cobra.Command{
 			configService := internal.NewConfigService()
 			configService.Set(internal.ApiKey, apiKeyString)
 			configService.Set(internal.ApiSecret, apiSecretString)
-			color.Green("Login successful.")
+			color.Green("You have successfully logged into Hazelcast Cloud.")
 		}
 		return nil
 	},
