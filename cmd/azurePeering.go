@@ -27,7 +27,7 @@ var azurePeeringCmd = &cobra.Command{
 var azurePeeringCreateCmd = &cobra.Command{
 	Use:     "create",
 	Short:   "This command creates Azure vNet Peering between your own vNet and your Enterprise Hazelcast cluster vNet.",
-	Example: "hzcloud azure-peering create --cluster-id=1 --project-id=2 --network-name=3",
+	Example: "hzcloud azure-peering create --cluster-id=1 --tenant-id=foo --subscription-id=bar --resource-group=baz --vnet=qux",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := internal.NewClient()
 		indicator := util.NewLoadingIndicator("Azure Peering starting...", 100)

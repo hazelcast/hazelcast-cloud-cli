@@ -8,13 +8,9 @@ import (
 	"strings"
 )
 
-var hazelcastCloudClient *hazelcastcloud.Client
-
 func NewClient() *hazelcastcloud.Client {
 	var apiKey = os.Getenv("HZ_CLOUD_API_KEY")
 	var apiSecret = os.Getenv("HZ_CLOUD_API_SECRET")
-	var apiUrl = os.Getenv("HZ_CLOUD_API_URL")
-	var client interface{}
 
 	if len(strings.TrimSpace(apiKey)) == 0 || len(strings.TrimSpace(apiSecret)) == 0 {
 		configService := NewConfigService()
@@ -29,20 +25,21 @@ func NewClient() *hazelcastcloud.Client {
 		os.Exit(1)
 	}
 
-	if len(strings.TrimSpace(apiUrl)) != 0 {
-		client = Validate(hazelcastcloud.NewFromCredentials(apiKey, apiSecret, hazelcastcloud.OptionEndpoint(apiUrl)))
-	} else {
-		client = Validate(hazelcastcloud.NewFromCredentials(apiKey, apiSecret))
-	}
+	return Validate(Login(apiKey, apiSecret)).(*hazelcastcloud.Client)
+}
 
-	hazelcastCloudClient = client.(*hazelcastcloud.Client)
-	return hazelcastCloudClient
+func Login(apiKey string, apiSecret string) (*hazelcastcloud.Client, *hazelcastcloud.Response, error) {
+	var apiUrl = os.Getenv("HZ_CLOUD_API_URL")
+	if len(strings.TrimSpace(apiUrl)) != 0 {
+		return hazelcastcloud.NewFromCredentials(apiKey, apiSecret, hazelcastcloud.OptionEndpoint(apiUrl))
+	}
+	return hazelcastcloud.NewFromCredentials(apiKey, apiSecret)
 }
 
 func Validate(a interface{}, b *hazelcastcloud.Response, c error) interface{} {
 	if c != nil {
 		if reflect.TypeOf(c) == reflect.TypeOf(&hazelcastcloud.ErrorResponse{}) {
-			color.Red("Message:%s CorrelationId:%s", c.(*hazelcastcloud.ErrorResponse).Message,
+			color.Red("Message:%s\nCorrelationId:%s", c.(*hazelcastcloud.ErrorResponse).Message,
 				c.(*hazelcastcloud.ErrorResponse).CorrelationId)
 		} else {
 			color.Red(c.Error())
