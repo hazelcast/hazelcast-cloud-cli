@@ -44,8 +44,6 @@ jobs:
         exclude:
           - goos: darwin
             goarch: arm
-          - goos: darwin
-            goarch: arm64
           - goos: windows
             goarch: arm64
         include:
@@ -68,11 +66,27 @@ jobs:
       - name: Download Dependencies
         run: go mod download
 
-      - name: Build ${{ matrix.os }}
+      - name: Build on ${{ matrix.os }}
+        if: ${{ matrix.goos != 'darwin' || matrix.goarch != 'arm64' }}
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: go build -ldflags "-w -s -X github.com/${{ env.organization }}/hazelcast-cloud-cli/internal.Version=${{ needs.release.outputs.version }} -X github.com/${{ env.organization }}/hazelcast-cloud-cli/internal.Distribution=DIRECT" -o hzcloud-${{ matrix.GOOS }}-${{ matrix.GOARCH }}
+
+      - name: Build for macos-arm64
+        if: ${{ matrix.goos == 'darwin' && matrix.goarch == 'arm64' }}
+        env:
+          GOOS: ${{ matrix.goos }}
+          GOARCH: ${{ matrix.goarch }}
+          SDK_PATH: "/Applications/Xcode_12.2.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX11.0.sdk"
+        run: |
+          CC="$(xcrun -sdk $SDK_PATH --find clang) -arch $GOARCH -isysroot $SDK_PATH" \
+          CFLAGS="-isysroot $SDK_PATH -arch $GOARCH -I$SDK_PATH/usr/include" \
+          LD_LIBRARY_PATH="$SDK_PATH/usr/lib" \
+          CGO_ENABLED=1 \
+          CGO_CFLAGS="-isysroot $SDK_PATH -arch $GOARCH" \
+          CGO_LDFLAGS="-isysroot $SDK_PATH -arch $GOARCH" \
+          go build -ldflags "-w -s -X github.com/${{ env.organization }}/hazelcast-cloud-cli/internal.Version=${{ needs.release.outputs.version }} -X github.com/${{ env.organization }}/hazelcast-cloud-cli/internal.Distribution=DIRECT" -o hzcloud-${{ matrix.goos }}-${{ matrix.GOARCH }}
 
       - name: Upload ${{ matrix.os }} Binary
         uses: actions/upload-release-asset@v1.0.1
