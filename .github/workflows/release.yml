@@ -1,7 +1,7 @@
 name: Release
 
 env:
-  organization: 'yunussandikci'
+  organization: 'hazelcast'
   go_version: '^1.15'
 
 on:
