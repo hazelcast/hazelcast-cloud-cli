@@ -1,7 +1,7 @@
 name: Release
 
 env:
-  organization: 'hazelcast'
+  organization: 'yunussandikci'
   go_version: '^1.15'
 
 on:
@@ -86,15 +86,19 @@ jobs:
 
   homebrew:
     name: Update Homebrew Formula
-    runs-on: ubuntu-latest
+    runs-on: macos-10.15
     needs: release
     steps:
-      - uses: mislav/bump-homebrew-formula-action@v1
-        with:
-          formula-name: hzcloud
-          homebrew-tap: ${{ env.organization }}/homebrew-hzcloud
-          base-branch: master
-          download-url: https://github.com/${{ env.organization }}/hazelcast-cloud-cli/archive/${{ needs.release.outputs.version }}.tar.gz
-          commit-message: Release ${{ needs.release.outputs.version }}
+      - name: Update Homebrew Formula
         env:
-          COMMITTER_TOKEN: ${{ secrets.HZ_CLOUD_GITHUB_TOKEN }}
+          HOMEBREW_GITHUB_API_TOKEN: ${{ secrets.HZ_CLOUD_GITHUB_TOKEN }}
+        run: |
+          wget https://github.com/${{ env.organization }}/hazelcast-cloud-cli/archive/${{ needs.release.outputs.version }}.tar.gz
+          brew tap ${{ env.organization }}/homebrew-hz
+          brew bump-formula-pr -f --no-browse --no-audit \
+          --message "Hi Team,
+          This pull request updates hzcloud version to ${{ needs.release.outputs.version }}
+          Thanks!" \
+          --sha256 "$(shasum -a 256 ${{ needs.release.outputs.version }}.tar.gz | awk '{printf $1}')" \
+          --url="https://github.com/${{ env.organization }}/hazelcast-cloud-cli/archive/${{ needs.release.outputs.version }}.tar.gz" \
+          ${{ env.organization }}/homebrew-hz/hzcloud
