@@ -15,7 +15,7 @@
 ## Installing `hzcloud`
 ### Using a Package Manager (Homebrew)
 ```sh
-brew tap hazelcast/hzcloud
+brew tap hazelcast/hz
 brew install hzcloud
 ```
 ### Downloading a Release from GitHub
