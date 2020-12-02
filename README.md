@@ -1,4 +1,3 @@
-## :construction: This CLI is still in active development and will be published soon!
 <h1>Hazelcast Cloud CLI</h1>
 <p>
   <img alt="release" src="https://github.com/hazelcast/hazelcast-cloud-cli/workflows/Release/badge.svg" />
@@ -16,7 +15,7 @@
 ## Installing `hzcloud`
 ### Using a Package Manager (Homebrew)
 ```sh
-brew tap hazelcast/hzcloud
+brew tap hazelcast/hz
 brew install hzcloud
 ```
 ### Downloading a Release from GitHub
