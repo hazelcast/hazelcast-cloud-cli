@@ -13,7 +13,7 @@
  <img alt="Screenshot" src="https://user-images.githubusercontent.com/1237982/97022384-b901a780-155c-11eb-87b4-5f4e945a0f1c.png" />
 
 ## Installing `hzcloud`
-This guide shows how to install the Hazelcast Cloud CLI. Hazelcast Cloud CLI can be installed either from source, or from pre-built binary releases.
+These instructions show how to you can install the Hazelcast Cloud CLI from different sources. Hazelcast Cloud CLI can be installed either from direct binary releases, or from source.
 
 ### From Homebrew
 ```sh
@@ -117,4 +117,4 @@ Contributions, issues and feature requests are welcome!<br />Feel free to check 
 
 Copyright © 2020 [Hazelcast](https://github.com/hazelcast).<br />
 This project is [Apache License 2.0](https://github.com/hazelcast/hazelcast-cloud-cli) licensed.<br /><br />
-<img alt="logo" width="300" src="https://cloud.hazelcast.com/static/images/hz-cloud-logo.svg" />
+<img alt="logo" width="300" src="https://cloud.hazelcast.com/images/hz-cloud-logo.svg" />
