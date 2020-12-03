@@ -120,7 +120,7 @@ var starterClusterResumeCmd = &cobra.Command{
 		clusterResponse := internal.Validate(client.StarterCluster.Resume(context.Background(), &models.ClusterResumeInput{
 			ClusterId: starterClusterId,
 		})).(*models.ClusterId)
-		color.Blue("Cluster %d stopped.", clusterResponse.ClusterId)
+		color.Blue("Cluster %d resumed.", clusterResponse.ClusterId)
 	},
 }
 
