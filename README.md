@@ -13,34 +13,27 @@
  <img alt="Screenshot" src="https://user-images.githubusercontent.com/1237982/97022384-b901a780-155c-11eb-87b4-5f4e945a0f1c.png" />
 
 ## Installing `hzcloud`
-### Using a Package Manager (Homebrew)
+This guide shows how to install the Hazelcast Cloud CLI. Hazelcast Cloud CLI can be installed either from source, or from pre-built binary releases.
+
+### From Homebrew
 ```sh
 brew tap hazelcast/hz
 brew install hzcloud
 ```
-### Downloading a Release from GitHub
-Visit the [Releases page](https://github.com/hazelcast/hazelcast-cloud-cli/releases) for the
-[`hzcloud` GitHub project](https://github.com/hazelcast/hazelcast-cloud-cli), and find the version for your operating system and architecture. Then place it into your directory with name `hzcloud` or `hzcloud.exe` for Windows.
 
-**Linux** 
-```sh
-wget \
-  https://github.com/hazelcast/hazelcast-cloud-cli/releases/latest/download/hzcloud-linux-amd64 \
-  -O /usr/local/bin/hzcloud && chmod +x /usr/local/bin/hzcloud
+### From the Script
+Hazelcast Cloud CLI has an installer script that will automatically grab the latest version according to your Operating System and Architecture.
 ```
-**Windows** 
-```sh
-curl -o hzcloud.exe `
-  https://github.com/hazelcast/hazelcast-cloud-cli/releases/latest/download/hzcloud-windows-amd64
+curl https://raw.githubusercontent.com/hazelcast/hazelcast-cloud-cli/master/scripts/install.sh | bash
 ```
-On Windows, in order to use `hzcloud` on everywhere you need to put `hzcloud.exe` into your PATH.
 
-**MacOS** 
-```sh
-wget \
-  https://github.com/hazelcast/hazelcast-cloud-cli/releases/latest/download/hzcloud-darwin-amd64 \
-  -O /usr/local/bin/hzcloud && chmod +x /usr/local/bin/hzcloud
-```
+### From the Binary Releases
+Every release of Hazelcast Cloud CLI provides binary releases for a variety of OSes. These binary versions can be manually downloaded and installed.
+1. Visit the [Releases page](https://github.com/hazelcast/hazelcast-cloud-cli/releases)
+2. Find the version for your operating system and architecture and download.
+3. Place it into your directory with name `hzcloud` or `hzcloud.exe` for Windows.
+ 
+ 
 ## Authentication with Hazelcast Cloud
 After a successful installation, in order to use, you need to authenticate with Hazelcast Cloud by providing access tokens, which can be created from `Developers` tab in [Hazelcast Cloud](https://cloud.hazelcast.com/settings/developer). You can check how to generate API Key and API Secret following the [Hazelcast Cloud Documentation](https://docs.cloud.hazelcast.com/docs/developer).
 
