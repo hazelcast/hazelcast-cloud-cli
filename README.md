@@ -119,4 +119,4 @@ Contributions, issues and feature requests are welcome!<br />Feel free to check 
 
 Copyright © 2020 [Hazelcast](https://github.com/hazelcast).<br />
 This project is [Apache License 2.0](https://github.com/hazelcast/hazelcast-cloud-cli) licensed.<br /><br />
-<img alt="logo" width="300" src="https://cloud.hazelcast.com/images/hz-cloud-logo.svg" />
+<img alt="logo" width="300" src="https://hazelcast-cloud-static-content.s3-us-west-2.amazonaws.com/hz-cloud-logo.svg" />
