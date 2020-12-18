@@ -92,7 +92,7 @@ func init() {
 	awsPeeringListCmd.Flags().StringVar(&enterpriseClusterId, "cluster-id", "", "id of the cluster")
 	_ = awsPeeringListCmd.MarkFlagRequired("cluster-id")
 
-	awsPeeringDeleteCmd.Flags().StringVar(&gcpPeeringId, "peering-id", "", "id of the peering")
+	awsPeeringDeleteCmd.Flags().StringVar(&awsPeeringId, "peering-id", "", "id of the peering")
 	_ = awsPeeringDeleteCmd.MarkFlagRequired("peering-id")
 
 	awsPeeringCreateCmd.Flags().StringVar(&enterpriseClusterId, "cluster-id", "", "id of the cluster")
