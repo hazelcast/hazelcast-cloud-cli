@@ -23,8 +23,8 @@ var availabilityZoneCmd = &cobra.Command{
 var availabilityZoneListCmd = &cobra.Command{
 	Use:     "list",
 	Short:   "This command shows a list of availability zones.",
-	Long:    "This command shows a list of availability zones. Availability zones are changes according to cloud provider, region,instance type and needed count",
-	Example: "hzcloud availability-zone list --cloud-provider=aws --region=us-wet-2 --instance-type=m5.large --count=3",
+	Long:    "This command shows a list of availability zones. Availability zones depend on the cloud provider, region, instance type and count.",
+	Example: "hzcloud availability-zone list --cloud-provider=aws --region=us-west-2 --instance-type=m5.large --count=3",
 	Run: func(cmd *cobra.Command, args []string) {
 		client := internal.NewClient()
 		availabilityZones := internal.Validate(client.AvailabilityZone.List(context.Background(), &models.AvailabilityZoneInput{
