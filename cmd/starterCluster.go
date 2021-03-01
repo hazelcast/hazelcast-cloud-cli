@@ -26,7 +26,7 @@ var starterClusterCmd = &cobra.Command{
 var starterClusterCreateCmd = &cobra.Command{
 	Use:     "create",
 	Short:   "This command creates Hazelcast instance with provided configurations.",
-	Example: "hzcloud starter-cluster create --cloud-provider=aws --cluster-type=FREE --name=mycluster --region=us-east-1 --total-memory=0.2 --hazelcast-version=4.1",
+	Example: "hzcloud starter-cluster create --cloud-provider=aws --cluster-type=FREE --name=mycluster --region=us-east-1 --total-memory=0.2 --hazelcast-version=4.0",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		client := internal.NewClient()
 		clusterType, err := util.AugmentStarterClusterType(starterClusterCreateClusterType)
