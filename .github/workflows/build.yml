@@ -24,13 +24,13 @@ jobs:
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: ${{ runner.os }}-go-
 
-      - name: Install golint
-        run: go get -u golang.org/x/lint/golint
+      - name: Install staticcheck
+        run: go get -u golang.org/x/tools/... && go get honnef.co/go/tools/cmd/staticcheck
 
       - name: Run linters
         run: |
           go vet ./...
-          golint -set_exit_status=1 ./...
+          staticcheck ./...
 
       - name: Run tests
         run: go test -v ./...
