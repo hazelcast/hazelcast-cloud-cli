@@ -3,11 +3,12 @@ package util
 import (
 	"errors"
 	"fmt"
+	"os"
+	"strings"
+
 	"github.com/fatih/color"
 	"github.com/hazelcast/hazelcast-cloud-sdk-go/models"
 	"github.com/jedib0t/go-pretty/v6/list"
-	"os"
-	"strings"
 )
 
 func AugmentStarterHazelcastVersion(starterClusterCreateHazelcastVersion float64) (models.StarterHazelcastVersion, error) {
@@ -135,7 +136,7 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 			wr.AppendItem(fmt.Sprintf("Map Indexes:"))
 			for _, mapIndex := range mapConfig.MapIndices {
 				wr.Indent()
-				wr.AppendItem(fmt.Sprintf("Name: %S", mapIndex.Name))
+				wr.AppendItem(fmt.Sprintf("Name: %s", mapIndex.Name))
 				wr.UnIndent()
 			}
 		}
