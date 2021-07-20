@@ -17,5 +17,7 @@ require (
 	github.com/jedib0t/go-pretty/v6 v6.0.5
 	github.com/spf13/cobra v1.1.0
 	golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0
+	golang.org/x/lint v0.0.0-20210508222113-6edffad5e616 // indirect
+	golang.org/x/tools v0.1.5 // indirect
 	google.golang.org/api v0.33.0
 )

@@ -1,0 +1,36 @@
+name: build
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+
+jobs:
+  core:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        go-version: [1.16.x]
+    name: Build CLI with Golang ${{ matrix.go-version }}
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - name: Install Go
+        uses: actions/setup-go@v2
+        with:
+          go-version: ${{ matrix.go-version }}
+
+      - uses: actions/cache@v2
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: ${{ runner.os }}-go-
+
+      - name: Install golint
+        run: go get -u golang.org/x/lint/golint
+
+      - name: Run linters
+        run: |
+          go vet ./...
+          golint -set_exit_status=1 ./...
+
+      - name: Run tests
+        run: go test -v ./...
