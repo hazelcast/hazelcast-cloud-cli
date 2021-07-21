@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"github.com/Azure/azure-sdk-for-go/profiles/2019-03-01/authorization/mgmt/authorization"
 	"github.com/Azure/azure-sdk-for-go/profiles/latest/graphrbac/graphrbac"
@@ -187,7 +186,7 @@ func (s *AzurePeeringService) deleteOrphanPeerings() error {
 				}
 				_ = deleteCustomerPeering.WaitForCompletionRef(context.Background(), s.customerVnetPeeringClient.Client)
 			} else {
-				return errors.New(fmt.Sprintf("You already have one connected peering connection named %s.", *customerPeer.Name))
+				return fmt.Errorf("you already have one connected peering connection named %s", *customerPeer.Name)
 			}
 		}
 	}

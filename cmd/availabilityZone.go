@@ -68,11 +68,16 @@ func init() {
 	availabilityZoneListCmd.Flags().StringVar(&availabilityZoneRegion, "region", "", "name of the cegion")
 	availabilityZoneListCmd.Flags().StringVar(&availabilityZoneInstanceType, "instance-type", "", "name of the instance type")
 	availabilityZoneListCmd.Flags().IntVar(&availabilityZoneInstanceCount, "count", 0, "instance count per zone")
-	err := availabilityZoneListCmd.MarkFlagRequired("cloud-provider")
-	err = availabilityZoneListCmd.MarkFlagRequired("region")
-	err = availabilityZoneListCmd.MarkFlagRequired("instance-type")
-	err = availabilityZoneListCmd.MarkFlagRequired("count")
-	if err != nil {
+	if err := availabilityZoneListCmd.MarkFlagRequired("cloud-provider"); err != nil {
+		panic(err)
+	}
+	if err := availabilityZoneListCmd.MarkFlagRequired("region"); err != nil {
+		panic(err)
+	}
+	if err := availabilityZoneListCmd.MarkFlagRequired("instance-type"); err != nil {
+		panic(err)
+	}
+	if err := availabilityZoneListCmd.MarkFlagRequired("count"); err != nil {
 		panic(err)
 	}
 }

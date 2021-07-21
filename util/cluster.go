@@ -18,7 +18,7 @@ func AugmentStarterHazelcastVersion(starterClusterCreateHazelcastVersion float64
 	case 4.0:
 		return models.Version40, nil
 	default:
-		return "", errors.New("You can only select 3.12 or 4.0 for Hazelcast version.")
+		return "", errors.New("you can only select 3.12 or 4.0 for Hazelcast version")
 	}
 }
 
@@ -33,7 +33,7 @@ func AugmentStarterClusterType(starterClusterCreateClusterType string) (models.S
 	case "LARGE":
 		return models.Large, nil
 	default:
-		return "", errors.New("You can only select FREE, SMALL, MEDIUM or LARGE for cluster type.")
+		return "", errors.New("you can only select FREE, SMALL, MEDIUM or LARGE for cluster type")
 	}
 }
 
@@ -65,7 +65,7 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 	wr.AppendItem(fmt.Sprintf("IP Whitelist: %s", getEnabledDisable(cluster.IsIpWhitelistEnabled)))
 	wr.AppendItem(fmt.Sprintf("TLS: %s", getEnabledDisable(cluster.IsTlsEnabled)))
 
-	wr.AppendItem(fmt.Sprintf("Product Type"))
+	wr.AppendItem("Product Type")
 	wr.Indent()
 	wr.AppendItem(fmt.Sprintf("Name: %s", cluster.ProductType.Name))
 	wr.AppendItem(fmt.Sprintf("Free: %t", cluster.ProductType.IsFree))
@@ -76,7 +76,7 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 	wr.AppendItem(fmt.Sprintf("Started at: %s", cluster.StartedAt))
 	wr.AppendItem(fmt.Sprintf("Stopped at: %s", cluster.StoppedAt))
 
-	wr.AppendItem(fmt.Sprintf("Cloud Provider"))
+	wr.AppendItem("Cloud Provider")
 	wr.Indent()
 	wr.AppendItem(fmt.Sprintf("Name: %s", cluster.CloudProvider.Name))
 	wr.AppendItem(fmt.Sprintf("Region: %s", cluster.CloudProvider.Region))
@@ -85,7 +85,7 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 	}
 	wr.UnIndent()
 
-	wr.AppendItem(fmt.Sprintf("Discovery Tokens"))
+	wr.AppendItem("Discovery Tokens")
 	wr.Indent()
 	for _, discoveryToken := range cluster.DiscoveryTokens {
 		wr.AppendItem(fmt.Sprintf("Source: %s", discoveryToken.Source))
@@ -93,7 +93,7 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 	}
 	wr.UnIndent()
 
-	wr.AppendItem(fmt.Sprintf("Specs"))
+	wr.AppendItem("Specs")
 	wr.Indent()
 	wr.AppendItem(fmt.Sprintf("Total Memory(GiB): %.1f ", cluster.Specs.TotalMemory))
 	if getIsClusterEnterprise(cluster) {
@@ -106,15 +106,15 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 	wr.UnIndent()
 
 	if getIsClusterEnterprise(cluster) {
-		wr.AppendItem(fmt.Sprintf("Networking"))
+		wr.AppendItem("Networking")
 		wr.Indent()
 		wr.AppendItem(fmt.Sprintf("Type: %s ", cluster.Networking.Type))
 		wr.AppendItem(fmt.Sprintf("Cidr Block: %s", cluster.Networking.CidrBlock))
-		wr.AppendItem(fmt.Sprintf("Peering"))
+		wr.AppendItem("Peering")
 		wr.Indent()
 		wr.AppendItem(fmt.Sprintf("Status: %s", getEnabledDisable(cluster.Networking.Peering.IsEnabled)))
 		wr.UnIndent()
-		wr.AppendItem(fmt.Sprintf("Private Link"))
+		wr.AppendItem("Private Link")
 		wr.Indent()
 		wr.AppendItem(fmt.Sprintf("Url: %s", cluster.Networking.PrivateLink.Url))
 		wr.AppendItem(fmt.Sprintf("State: %s", cluster.Networking.PrivateLink.State))
@@ -122,18 +122,18 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 		wr.UnIndent()
 	}
 
-	wr.AppendItem(fmt.Sprintf("Data Structures"))
+	wr.AppendItem("Data Structures")
 	wr.Indent()
-	wr.AppendItem(fmt.Sprintf("Map Configs"))
+	wr.AppendItem("Map Configs")
 	for _, mapConfig := range cluster.DataStructures.MapConfigs {
 		wr.Indent()
-		wr.AppendItem(fmt.Sprintf("%s", mapConfig.Name))
+		wr.AppendItem(mapConfig.Name)
 		wr.Indent()
 		wr.AppendItem(fmt.Sprintf("Async Backup Count: %d", mapConfig.AsyncBackupCount))
 		wr.AppendItem(fmt.Sprintf("Backup Count: %d", mapConfig.BackupCount))
 		wr.AppendItem(fmt.Sprintf("Eviction Policy: %s", mapConfig.EvictionPolicy))
 		if len(mapConfig.MapIndices) != 0 {
-			wr.AppendItem(fmt.Sprintf("Map Indexes:"))
+			wr.AppendItem("Map Indexes:")
 			for _, mapIndex := range mapConfig.MapIndices {
 				wr.Indent()
 				wr.AppendItem(fmt.Sprintf("Name: %s", mapIndex.Name))
@@ -141,7 +141,7 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 			}
 		}
 		if mapConfig.MapStore.ClassName != "" {
-			wr.AppendItem(fmt.Sprintf("Map Store"))
+			wr.AppendItem("Map Store")
 			wr.Indent()
 			wr.AppendItem(fmt.Sprintf("Class Name: %s", mapConfig.MapStore.ClassName))
 			wr.AppendItem(fmt.Sprintf("Write Batch Size: %d", mapConfig.MapStore.WriteBatchSize))
@@ -159,10 +159,10 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 		wr.UnIndent()
 	}
 
-	wr.AppendItem(fmt.Sprintf("List Configs:"))
+	wr.AppendItem("List Configs:")
 	for _, listConfig := range cluster.DataStructures.ListConfigs {
 		wr.Indent()
-		wr.AppendItem(fmt.Sprintf("%s", listConfig.Name))
+		wr.AppendItem(listConfig.Name)
 		wr.Indent()
 		wr.AppendItem(fmt.Sprintf("Async Backup Count: %d", listConfig.AsyncBackupCount))
 		wr.AppendItem(fmt.Sprintf("Backup Count: %d", listConfig.BackupCount))
@@ -172,10 +172,10 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 		wr.UnIndent()
 	}
 
-	wr.AppendItem(fmt.Sprintf("Set Configs:"))
+	wr.AppendItem("Set Configs:")
 	for _, setConfig := range cluster.DataStructures.SetConfigs {
 		wr.Indent()
-		wr.AppendItem(fmt.Sprintf("%s", setConfig.Name))
+		wr.AppendItem(setConfig.Name)
 		wr.Indent()
 		wr.AppendItem(fmt.Sprintf("Async Backup Count: %d", setConfig.AsyncBackupCount))
 		wr.AppendItem(fmt.Sprintf("Backup Count: %d", setConfig.BackupCount))
@@ -185,10 +185,10 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 		wr.UnIndent()
 	}
 
-	wr.AppendItem(fmt.Sprintf("Queue Configs:"))
+	wr.AppendItem("Queue Configs:")
 	for _, queueConfig := range cluster.DataStructures.QueueConfigs {
 		wr.Indent()
-		wr.AppendItem(fmt.Sprintf("%s", queueConfig.Name))
+		wr.AppendItem(queueConfig.Name)
 		wr.Indent()
 		wr.AppendItem(fmt.Sprintf("Async Backup Count: %d", queueConfig.AsyncBackupCount))
 		wr.AppendItem(fmt.Sprintf("Backup Count: %d", queueConfig.BackupCount))
@@ -199,10 +199,10 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 		wr.UnIndent()
 	}
 
-	wr.AppendItem(fmt.Sprintf("Jcache Configs:"))
+	wr.AppendItem("Jcache Configs:")
 	for _, jcacheConfig := range cluster.DataStructures.JCacheConfigs {
 		wr.Indent()
-		wr.AppendItem(fmt.Sprintf("%s", jcacheConfig.Name))
+		wr.AppendItem(jcacheConfig.Name)
 		wr.Indent()
 		wr.AppendItem(fmt.Sprintf("Async Backup Count: %d", jcacheConfig.AsyncBackupCount))
 		wr.AppendItem(fmt.Sprintf("Backup Count: %d", jcacheConfig.BackupCount))
@@ -217,10 +217,10 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 		wr.UnIndent()
 	}
 
-	wr.AppendItem(fmt.Sprintf("MultiMap Configs:"))
+	wr.AppendItem("MultiMap Configs:")
 	for _, multiMapConfig := range cluster.DataStructures.MultiMapConfigs {
 		wr.Indent()
-		wr.AppendItem(fmt.Sprintf("%s", multiMapConfig.Name))
+		wr.AppendItem(multiMapConfig.Name)
 		wr.Indent()
 		wr.AppendItem(fmt.Sprintf("Async Backup Count: %d", multiMapConfig.AsyncBackupCount))
 		wr.AppendItem(fmt.Sprintf("Backup Count: %d", multiMapConfig.BackupCount))
@@ -230,10 +230,10 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 		wr.UnIndent()
 	}
 
-	wr.AppendItem(fmt.Sprintf("Topic Configs:"))
+	wr.AppendItem("Topic Configs:")
 	for _, topicConfig := range cluster.DataStructures.TopicConfigs {
 		wr.Indent()
-		wr.AppendItem(fmt.Sprintf("%s", topicConfig.Name))
+		wr.AppendItem(topicConfig.Name)
 		wr.Indent()
 		wr.AppendItem(fmt.Sprintf("Global Ordering: %s", getEnabledDisable(topicConfig.GlobalOrdering)))
 		wr.AppendItem(fmt.Sprintf("Ready: %t", topicConfig.IsReady))
@@ -241,10 +241,10 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 		wr.UnIndent()
 	}
 
-	wr.AppendItem(fmt.Sprintf("RingBuffer Configs:"))
+	wr.AppendItem("RingBuffer Configs:")
 	for _, ringBufferConfig := range cluster.DataStructures.RingBufferConfigs {
 		wr.Indent()
-		wr.AppendItem(fmt.Sprintf("%s", ringBufferConfig.Name))
+		wr.AppendItem(ringBufferConfig.Name)
 		wr.Indent()
 		wr.AppendItem(fmt.Sprintf("Async Backup Count: %d", ringBufferConfig.AsyncBackupCount))
 		wr.AppendItem(fmt.Sprintf("Backup Count: %d", ringBufferConfig.BackupCount))
@@ -256,10 +256,10 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 		wr.UnIndent()
 	}
 
-	wr.AppendItem(fmt.Sprintf("ReliableTopic Configs:"))
+	wr.AppendItem("ReliableTopic Configs:")
 	for _, reliableTopicConfig := range cluster.DataStructures.ReliableTopicConfigs {
 		wr.Indent()
-		wr.AppendItem(fmt.Sprintf("%s", reliableTopicConfig.Name))
+		wr.AppendItem(reliableTopicConfig.Name)
 		wr.Indent()
 		wr.AppendItem(fmt.Sprintf("Topic Overload Policy: %s", reliableTopicConfig.TopicOverloadPolicy))
 		wr.AppendItem(fmt.Sprintf("Read Batch Size: %d", reliableTopicConfig.ReadBatchSize))
@@ -268,10 +268,10 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 		wr.UnIndent()
 	}
 
-	wr.AppendItem(fmt.Sprintf("ReliableTopic Configs:"))
+	wr.AppendItem("ReliableTopic Configs:")
 	for _, replicatedMapConfig := range cluster.DataStructures.ReplicatedMapConfigs {
 		wr.Indent()
-		wr.AppendItem(fmt.Sprintf("%s", replicatedMapConfig.Name))
+		wr.AppendItem(replicatedMapConfig.Name)
 		wr.Indent()
 		wr.AppendItem(fmt.Sprintf("In Memory Format: %s", replicatedMapConfig.InMemoryFormat))
 		wr.AppendItem(fmt.Sprintf("Async Fill Up: %s", getEnabledDisable(replicatedMapConfig.AsyncFillUp)))
