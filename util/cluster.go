@@ -37,6 +37,17 @@ func AugmentStarterClusterType(starterClusterCreateClusterType string) (models.S
 	}
 }
 
+func AugmentZoneType(enterpriseClusterCreateZoneType string) (models.ZoneType, error) {
+	switch enterpriseClusterCreateZoneType {
+	case "SINGLE":
+		return models.ZoneTypeSingle, nil
+	case "MULTI":
+		return models.ZoneTypeMultiple, nil
+	default:
+		return "", errors.New("you can only select SINGLE or MULTI as a zone type")
+	}
+}
+
 func getEnabledDisable(bool bool) string {
 	if bool {
 		return "Enabled"

@@ -15,6 +15,7 @@ import (
 
 var enterpriseClusterId string
 var enterpriseClusterCreateInput models.CreateEnterpriseClusterInput
+var enterpriseClusterCreateZoneType string
 
 var enterpriseClusterCmd = &cobra.Command{
 	Use:     "enterprise-cluster",
@@ -25,8 +26,13 @@ var enterpriseClusterCmd = &cobra.Command{
 var enterpriseClusterCreateCmd = &cobra.Command{
 	Use:     "create",
 	Short:   "This command creates Hazelcast instance with provided configurations.",
-	Example: "hzcloud enterprise-cluster create --name=mycluster2 --cloud-provider=aws --region=eu-west-2 --zones=eu-west-2b --hazelcast-version=4.0 --instance-type=m5.large --cidr-block=10.0.80.0/16 --native-memory=4 --wait",
+	Example: "hzcloud enterprise-cluster create --name=mycluster2 --cloud-provider=aws --region=eu-west-2 --hazelcast-version=4.0 --instance-type=m5.large --cidr-block=10.0.80.0/16 --native-memory=4 --wait",
 	RunE: func(cmd *cobra.Command, args []string) error {
+		zoneType, err := util.AugmentZoneType(enterpriseClusterCreateZoneType)
+		if err != nil {
+			return err
+		}
+		enterpriseClusterCreateInput.ZoneType = zoneType
 		client := internal.NewClient()
 		cluster := internal.Validate(client.EnterpriseCluster.Create(context.Background(), &enterpriseClusterCreateInput)).(*models.Cluster)
 		color.Green("Cluster creation started.")
@@ -128,11 +134,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-	enterpriseClusterCreateCmd.Flags().StringSliceVar(&enterpriseClusterCreateInput.Zones, "zones", []string{}, "name of the zones")
-	err = enterpriseClusterCreateCmd.MarkFlagRequired("zones")
-	if err != nil {
-		panic(err)
-	}
 	enterpriseClusterCreateCmd.Flags().StringVar(&enterpriseClusterCreateInput.HazelcastVersion, "hazelcast-version", "", "version of the Hazelcast")
 	err = enterpriseClusterCreateCmd.MarkFlagRequired("hazelcast-version")
 	if err != nil {
@@ -140,6 +141,10 @@ func init() {
 	}
 	enterpriseClusterCreateCmd.Flags().StringVar(&enterpriseClusterCreateInput.InstanceType, "instance-type", "", "physical type of the instance")
 	err = enterpriseClusterCreateCmd.MarkFlagRequired("instance-type")
+	if err != nil {
+		panic(err)
+	}
+	enterpriseClusterCreateCmd.Flags().StringVar(&enterpriseClusterCreateZoneType, "zone-type", "", "zone type of the cluster")
 	if err != nil {
 		panic(err)
 	}
