@@ -145,6 +145,8 @@ func init() {
 		panic(err)
 	}
 	enterpriseClusterCreateCmd.Flags().StringVar(&enterpriseClusterCreateZoneType, "zone-type", "", "zone type of the cluster")
+	err = enterpriseClusterCreateCmd.MarkFlagRequired("zone-type")
+
 	if err != nil {
 		panic(err)
 	}
