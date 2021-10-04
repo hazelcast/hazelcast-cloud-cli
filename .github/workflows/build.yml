@@ -29,11 +29,11 @@ jobs:
 
       - name: Run 'go vet'
         run: go vet ./...
-        continue-on-error: true #TODO enable once fixed
+        continue-on-error: false
 
       - name: Run 'staticcheck'
         run: staticcheck ./...
-        continue-on-error: true #TODO enable once fixed
+        continue-on-error: false
 
       - name: Run tests
         run: go test -v ./...

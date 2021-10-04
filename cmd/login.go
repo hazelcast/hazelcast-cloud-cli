@@ -5,7 +5,7 @@ import (
 	"github.com/fatih/color"
 	"github.com/hazelcast/hazelcast-cloud-cli/internal"
 	"github.com/spf13/cobra"
-	"golang.org/x/crypto/ssh/terminal"
+	"golang.org/x/term"
 	"os"
 	"strings"
 )
@@ -17,10 +17,10 @@ var loginCmd = &cobra.Command{
 	Short:   "This command logins you to Hazelcast Cloud with api-key and api-secret.",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		fmt.Print("API Key: ")
-		apiKey, _ := terminal.ReadPassword(int(os.Stdin.Fd()))
+		apiKey, _ := term.ReadPassword(int(os.Stdin.Fd()))
 		fmt.Printf("\r\033[K")
 		fmt.Print("API Secret: ")
-		apiSecret, _ := terminal.ReadPassword(int(os.Stdin.Fd()))
+		apiSecret, _ := term.ReadPassword(int(os.Stdin.Fd()))
 		fmt.Printf("\r\033[K")
 		apiKeyString := strings.TrimSpace(string(apiKey))
 		apiSecretString := strings.TrimSpace(string(apiSecret))
