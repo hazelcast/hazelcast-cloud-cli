@@ -15,10 +15,10 @@ func AugmentStarterHazelcastVersion(starterClusterCreateHazelcastVersion float64
 	switch starterClusterCreateHazelcastVersion {
 	case 3.12:
 		return models.Version312, nil
-	case 4.0:
-		return models.Version40, nil
+	case 4.2:
+		return models.Version42, nil
 	default:
-		return "", errors.New("you can only select 3.12 or 4.0 for Hazelcast version")
+		return "", errors.New("you can only select 3.12 or 4.2 for Hazelcast version")
 	}
 }
 
