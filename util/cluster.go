@@ -11,18 +11,7 @@ import (
 	"github.com/jedib0t/go-pretty/v6/list"
 )
 
-func AugmentStarterHazelcastVersion(starterClusterCreateHazelcastVersion float64) (models.StarterHazelcastVersion, error) {
-	switch starterClusterCreateHazelcastVersion {
-	case 3.12:
-		return models.Version312, nil
-	case 4.0:
-		return models.Version40, nil
-	default:
-		return "", errors.New("you can only select 3.12 or 4.0 for Hazelcast version")
-	}
-}
-
-func AugmentStarterClusterType(starterClusterCreateClusterType string) (models.StarterClusterType, error) {
+func  AugmentStarterClusterType(starterClusterCreateClusterType string) (models.StarterClusterType, error) {
 	switch strings.ToUpper(starterClusterCreateClusterType) {
 	case "FREE":
 		return models.Free, nil
@@ -66,6 +55,7 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 
 	wr.AppendItem(fmt.Sprintf("Id: %s", cluster.Id))
 	wr.AppendItem(fmt.Sprintf("Name: %s", cluster.Name))
+	wr.AppendItem(fmt.Sprintf("Release Name: %s", cluster.ReleaseName))
 	wr.AppendItem(fmt.Sprintf("Customer Id: %d", cluster.CustomerId))
 	wr.AppendItem(fmt.Sprintf("Password: %s", cluster.Password))
 	wr.AppendItem(fmt.Sprintf("Port: %d", cluster.Port))

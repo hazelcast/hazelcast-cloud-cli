@@ -26,7 +26,7 @@ var enterpriseClusterCmd = &cobra.Command{
 var enterpriseClusterCreateCmd = &cobra.Command{
 	Use:     "create",
 	Short:   "This command creates Hazelcast instance with provided configurations.",
-	Example: "hzcloud enterprise-cluster create --name=mycluster2 --cloud-provider=aws --region=eu-west-2 --hazelcast-version=4.0 --instance-type=m5.large --cidr-block=10.0.80.0/16 --native-memory=4 --wait",
+	Example: "hzcloud enterprise-cluster create --name=mycluster2 --cloud-provider=aws --region=eu-west-2 --zone-type=SINGLE --hazelcast-version=4.0 --instance-type=m5.large --cidr-block=10.80.0.0/16 --native-memory=4 --wait",
 	RunE: func(cmd *cobra.Command, args []string) error {
 		zoneType, err := util.AugmentZoneType(enterpriseClusterCreateZoneType)
 		if err != nil {

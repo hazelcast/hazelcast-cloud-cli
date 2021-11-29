@@ -15,7 +15,6 @@ var starterClusterId string
 var starterClusterCreateInput models.CreateStarterClusterInput
 
 var starterClusterCreateClusterType string
-var starterClusterCreateHazelcastVersion float64
 
 var starterClusterCmd = &cobra.Command{
 	Use:     "starter-cluster",
@@ -34,13 +33,7 @@ var starterClusterCreateCmd = &cobra.Command{
 			return err
 		}
 
-		hazelcastVersion, err2 := util.AugmentStarterHazelcastVersion(starterClusterCreateHazelcastVersion)
-		if err2 != nil {
-			return err2
-		}
-
 		starterClusterCreateInput.ClusterType = clusterType
-		starterClusterCreateInput.HazelcastVersion = hazelcastVersion
 		cluster := internal.Validate(client.StarterCluster.Create(context.Background(), &starterClusterCreateInput)).(*models.Cluster)
 		color.Green("Cluster %s is creating. You can check the status using hzcloud starter-cluster list.", cluster.Id)
 		return nil
@@ -142,7 +135,7 @@ func init() {
 	_ = starterClusterCreateCmd.MarkFlagRequired("cluster-type")
 	starterClusterCreateCmd.Flags().Float64Var(&starterClusterCreateInput.TotalMemory, "total-memory", 0, "total memory of cluster as gb")
 	_ = starterClusterCreateCmd.MarkFlagRequired("total-memory")
-	starterClusterCreateCmd.Flags().Float64Var(&starterClusterCreateHazelcastVersion, "hazelcast-version", 0, "version of hazelcast")
+	starterClusterCreateCmd.Flags().StringVar(&starterClusterCreateInput.HazelcastVersion, "hazelcast-version", "", "version of hazelcast")
 	_ = starterClusterCreateCmd.MarkFlagRequired("hazelcast-version")
 
 	starterClusterCreateCmd.Flags().BoolVar(&starterClusterCreateInput.IsAutoScalingEnabled, "auto-scaling-enabled", false, "auto scaling feature")
