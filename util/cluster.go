@@ -11,7 +11,7 @@ import (
 	"github.com/jedib0t/go-pretty/v6/list"
 )
 
-func  AugmentStarterClusterType(starterClusterCreateClusterType string) (models.StarterClusterType, error) {
+func AugmentStarterClusterType(starterClusterCreateClusterType string) (models.StarterClusterType, error) {
 	switch strings.ToUpper(starterClusterCreateClusterType) {
 	case "FREE":
 		return models.Free, nil
@@ -54,8 +54,8 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 	wr.SetStyle(list.StyleConnectedBold)
 
 	wr.AppendItem(fmt.Sprintf("Id: %s", cluster.Id))
-	wr.AppendItem(fmt.Sprintf("Name: %s", cluster.Name))
-	wr.AppendItem(fmt.Sprintf("Release Name: %s", cluster.ReleaseName))
+	wr.AppendItem(fmt.Sprintf("Display Name: %s", cluster.Name))
+	wr.AppendItem(fmt.Sprintf("Cluster Name: %s", cluster.ReleaseName))
 	wr.AppendItem(fmt.Sprintf("Customer Id: %d", cluster.CustomerId))
 	wr.AppendItem(fmt.Sprintf("Password: %s", cluster.Password))
 	wr.AppendItem(fmt.Sprintf("Port: %d", cluster.Port))
