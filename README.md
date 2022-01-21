@@ -66,7 +66,7 @@ hzcloud starter-cluster create \
   --name=mycluster \
   --region=us-west-2 \
   --total-memory=0.2 \
-  --hazelcast-version=5.0.2
+  --hazelcast-version=5.0.2-1
 ```
 Also, you can check other parameters with help command
 ```sh
