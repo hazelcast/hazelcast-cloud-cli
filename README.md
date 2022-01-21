@@ -66,7 +66,7 @@ hzcloud starter-cluster create \
   --name=mycluster \
   --region=us-west-2 \
   --total-memory=0.2 \
-  --hazelcast-version=5.0
+  --hazelcast-version=5.0.2
 ```
 Also, you can check other parameters with help command
 ```sh
@@ -85,7 +85,7 @@ hzcloud enterprise-cluster create \
   --cloud-provider=aws \
   --region=eu-west-2 \
   --zones=eu-west-2b \
-  --hazelcast-version=5.0 \
+  --hazelcast-version=5.0.2 \
   --instance-type=m5.large \
   --cidr-block=10.0.80.0/16 \
   --native-memory=4 \
