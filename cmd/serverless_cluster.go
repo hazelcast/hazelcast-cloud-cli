@@ -8,13 +8,15 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var serverlessClusterCmd = &cobra.Command{
-	Use:     "serverless-cluster",
-	Aliases: []string{"slc"},
-	Short:   "This command allows you to make actions on your serverless clusters like: create, delete, stop or resume.",
+func newServerlessClusterCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:     "serverless-cluster",
+		Aliases: []string{"slc"},
+		Short:   "This command allows you to make actions on your serverless clusters like: create, delete, stop or resume.",
+	}
 }
 
-func getServerlessClusterCreateCmd() *cobra.Command {
+func newServerlessClusterCreateCmd() *cobra.Command {
 	var createClusterInputParams models.CreateServerlessClusterInput
 
 	serverlessClusterCreateCmd := cobra.Command{
@@ -28,16 +30,24 @@ func getServerlessClusterCreateCmd() *cobra.Command {
 		},
 	}
 
-	createClusterInputParams.ClusterType = models.Serverless
 	serverlessClusterCreateCmd.Flags().StringVar(&createClusterInputParams.Name, "name", "", "name of the cluster (required)")
 	_ = serverlessClusterCreateCmd.MarkFlagRequired("name")
+
 	serverlessClusterCreateCmd.Flags().StringVar(&createClusterInputParams.Region, "region", "", "name of the region (required)")
 	_ = serverlessClusterCreateCmd.MarkFlagRequired("region")
 
+	var devModeEnabled bool
+	serverlessClusterCreateCmd.Flags().BoolVar(&devModeEnabled, "dev-mode-enabled", false, "development mode")
+	if devModeEnabled {
+		createClusterInputParams.ClusterType = models.Devmode
+	} else {
+		createClusterInputParams.ClusterType = models.Serverless
+	}
 	return &serverlessClusterCreateCmd
 }
 
 func init() {
+	serverlessClusterCmd := newServerlessClusterCmd()
 	rootCmd.AddCommand(serverlessClusterCmd)
-	serverlessClusterCmd.AddCommand(getServerlessClusterCreateCmd())
+	serverlessClusterCmd.AddCommand(newServerlessClusterCreateCmd())
 }
