@@ -11,7 +11,7 @@ import (
 	"github.com/jedib0t/go-pretty/v6/list"
 )
 
-func AugmentStarterClusterType(starterClusterCreateClusterType string) (models.StarterClusterType, error) {
+func AugmentStarterClusterType(starterClusterCreateClusterType string) (models.ClusterType, error) {
 	switch strings.ToUpper(starterClusterCreateClusterType) {
 	case "FREE":
 		return models.Free, nil
