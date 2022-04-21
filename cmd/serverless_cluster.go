@@ -28,6 +28,7 @@ func getServerlessClusterCreateCmd() *cobra.Command {
 		},
 	}
 
+	createClusterInputParams.ClusterType = models.Serverless
 	serverlessClusterCreateCmd.Flags().StringVar(&createClusterInputParams.Name, "name", "", "name of the cluster (required)")
 	_ = serverlessClusterCreateCmd.MarkFlagRequired("name")
 	serverlessClusterCreateCmd.Flags().StringVar(&createClusterInputParams.Region, "region", "", "name of the region (required)")
