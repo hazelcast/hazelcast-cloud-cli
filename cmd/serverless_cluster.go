@@ -74,10 +74,36 @@ func newServerlessClusterListCmd() *cobra.Command {
 	}
 }
 
+func newServerlessClusterGetCmd() *cobra.Command {
+	var serverlessClusterId string
+
+	serverlessClusterGetCmd := cobra.Command{
+		Use:     "get",
+		Short:   "This command get detailed configuration of serverless Hazelcast cluster instance.",
+		Example: "hzcloud serverless-cluster get --cluster-id=100",
+		Run: func(cmd *cobra.Command, args []string) {
+			client := internal.NewClient()
+			cluster := internal.Validate(client.ServerlessCluster.Get(context.Background(), &models.GetServerlessClusterInput{
+				ClusterId: serverlessClusterId,
+			})).(*models.Cluster)
+			util.Print(util.PrintRequest{
+				Data:       *cluster,
+				PrintStyle: util.PrintStyle(outputStyle),
+			})
+		},
+	}
+
+	serverlessClusterGetCmd.Flags().StringVar(&serverlessClusterId, "cluster-id", "", "id of the cluster")
+	_ = serverlessClusterGetCmd.MarkFlagRequired("cluster-id")
+
+	return &serverlessClusterGetCmd
+}
+
 func init() {
 	serverlessClusterCmd := newServerlessClusterCmd()
 	rootCmd.AddCommand(serverlessClusterCmd)
 
 	serverlessClusterCmd.AddCommand(newServerlessClusterCreateCmd())
 	serverlessClusterCmd.AddCommand(newServerlessClusterListCmd())
+	serverlessClusterCmd.AddCommand(newServerlessClusterGetCmd())
 }

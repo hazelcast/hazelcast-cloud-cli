@@ -72,6 +72,11 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 	wr.AppendItem(fmt.Sprintf("Free: %t", cluster.ProductType.IsFree))
 	wr.UnIndent()
 
+	wr.AppendItem("Cluster Type")
+	wr.Indent()
+	wr.AppendItem(fmt.Sprintf("Name: %s", cluster.ClusterType.Name))
+	wr.UnIndent()
+
 	wr.AppendItem(fmt.Sprintf("State: %s", cluster.State))
 	wr.AppendItem(fmt.Sprintf("Created at: %s", cluster.CreatedAt))
 	wr.AppendItem(fmt.Sprintf("Started at: %s", cluster.StartedAt))
