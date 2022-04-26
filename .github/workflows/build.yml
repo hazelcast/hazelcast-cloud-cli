@@ -25,7 +25,7 @@ jobs:
           restore-keys: ${{ runner.os }}-go-
 
       - name: Install staticcheck
-        run: go get -u golang.org/x/tools/... && go get honnef.co/go/tools/cmd/staticcheck
+        run: go install honnef.co/go/tools/cmd/staticcheck@2020.2.1
 
       - name: Run 'go vet'
         run: go vet ./...
