@@ -4,7 +4,9 @@ import (
 	"context"
 	"github.com/fatih/color"
 	"github.com/hazelcast/hazelcast-cloud-cli/internal"
+	"github.com/hazelcast/hazelcast-cloud-cli/util"
 	"github.com/hazelcast/hazelcast-cloud-sdk-go/models"
+	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
 )
 
@@ -20,8 +22,9 @@ func newServerlessClusterCreateCmd() *cobra.Command {
 	var createClusterInputParams models.CreateServerlessClusterInput
 
 	serverlessClusterCreateCmd := cobra.Command{
-		Use:   "create",
-		Short: "hzcloud serverless-cluster create --name=mycluster --region=us-west-2",
+		Use:     "create",
+		Short:   "This command allows you to create a serverless cluster.",
+		Example: "hzcloud serverless-cluster create --name=mycluster --region=us-west-2",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			client := internal.NewClient()
 			cluster := internal.Validate(client.ServerlessCluster.Create(context.Background(), &createClusterInputParams)).(*models.Cluster)
@@ -46,8 +49,35 @@ func newServerlessClusterCreateCmd() *cobra.Command {
 	return &serverlessClusterCreateCmd
 }
 
+func newServerlessClusterListCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:     "list",
+		Short:   "This command allows you to create a serverless cluster.",
+		Example: "hzcloud serverless-cluster list",
+		Run: func(cmd *cobra.Command, args []string) {
+			client := internal.NewClient()
+			clusters := internal.Validate(client.ServerlessCluster.List(context.Background())).(*[]models.Cluster)
+			header := table.Row{"Id", "Name", "Type", "State", "Version", "Memory (GiB)", "Cloud Provider", "Region"}
+			var rows []table.Row
+			for _, cluster := range *clusters {
+				rows = append(rows, table.Row{cluster.Id, cluster.Name, cluster.ClusterType.Name, cluster.State,
+					cluster.HazelcastVersion, cluster.Specs.TotalMemory, cluster.CloudProvider.Name,
+					cluster.CloudProvider.Region})
+			}
+			util.Print(util.PrintRequest{
+				Header:     header,
+				Rows:       rows,
+				Data:       clusters,
+				PrintStyle: util.PrintStyle(outputStyle),
+			})
+		},
+	}
+}
+
 func init() {
 	serverlessClusterCmd := newServerlessClusterCmd()
 	rootCmd.AddCommand(serverlessClusterCmd)
+
 	serverlessClusterCmd.AddCommand(newServerlessClusterCreateCmd())
+	serverlessClusterCmd.AddCommand(newServerlessClusterListCmd())
 }
