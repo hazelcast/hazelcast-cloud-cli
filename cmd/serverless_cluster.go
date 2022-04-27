@@ -143,6 +143,28 @@ func newServerlessClusterStopCmd() *cobra.Command {
 	return serverlessClusterStopCmd
 }
 
+func newServerlessClusterResumeCmd() *cobra.Command {
+	var serverlessClusterId string
+
+	serverlessClusterResumeCmd := &cobra.Command{
+		Use:     "resume",
+		Short:   "This command resumes Hazelcast Instance according to its id",
+		Example: "hzcloud serverless-cluster resume --cluster-id=100",
+		Run: func(cmd *cobra.Command, args []string) {
+			client := internal.NewClient()
+			clusterResponse := internal.Validate(client.ServerlessCluster.Resume(context.Background(), &models.ClusterResumeInput{
+				ClusterId: serverlessClusterId,
+			})).(*models.ClusterId)
+			color.Blue("Cluster %d resumed.", clusterResponse.ClusterId)
+		},
+	}
+
+	serverlessClusterResumeCmd.Flags().StringVar(&serverlessClusterId, "cluster-id", "", "id of the cluster")
+	_ = serverlessClusterResumeCmd.MarkFlagRequired("cluster-id")
+
+	return serverlessClusterResumeCmd
+}
+
 func init() {
 	serverlessClusterCmd := newServerlessClusterCmd()
 	rootCmd.AddCommand(serverlessClusterCmd)
@@ -152,4 +174,5 @@ func init() {
 	serverlessClusterCmd.AddCommand(newServerlessClusterGetCmd())
 	serverlessClusterCmd.AddCommand(newServerlessClusterDeleteCmd())
 	serverlessClusterCmd.AddCommand(newServerlessClusterStopCmd())
+	serverlessClusterCmd.AddCommand(newServerlessClusterResumeCmd())
 }
