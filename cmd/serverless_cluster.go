@@ -104,7 +104,7 @@ func newServerlessClusterDeleteCmd() *cobra.Command {
 
 	serverlessClusterDeleteCmd := &cobra.Command{
 		Use:     "delete",
-		Short:   "This command deletes a serverless Hazelcast cluster.",
+		Short:   "This command allows you to delete a serverless Hazelcast cluster.",
 		Example: "hzcloud serverless-cluster delete --cluster-id=100",
 		Run: func(cmd *cobra.Command, args []string) {
 			client := internal.NewClient()
@@ -121,6 +121,28 @@ func newServerlessClusterDeleteCmd() *cobra.Command {
 	return serverlessClusterDeleteCmd
 }
 
+func newServerlessClusterStopCmd() *cobra.Command {
+	var serverlessClusterId string
+
+	serverlessClusterStopCmd := &cobra.Command{
+		Use:     "stop",
+		Short:   "This command allows you to stop a Hazelcast cluster.",
+		Example: "hzcloud serverless-cluster stop --cluster-id=100",
+		Run: func(cmd *cobra.Command, args []string) {
+			client := internal.NewClient()
+			clusterResponse := internal.Validate(client.ServerlessCluster.Stop(context.Background(), &models.ClusterStopInput{
+				ClusterId: serverlessClusterId,
+			})).(*models.ClusterId)
+			color.Blue("Cluster %d stopped.", clusterResponse.ClusterId)
+		},
+	}
+
+	serverlessClusterStopCmd.Flags().StringVar(&serverlessClusterId, "cluster-id", "", "id of the cluster")
+	_ = serverlessClusterStopCmd.MarkFlagRequired("cluster-id")
+
+	return serverlessClusterStopCmd
+}
+
 func init() {
 	serverlessClusterCmd := newServerlessClusterCmd()
 	rootCmd.AddCommand(serverlessClusterCmd)
@@ -129,4 +151,5 @@ func init() {
 	serverlessClusterCmd.AddCommand(newServerlessClusterListCmd())
 	serverlessClusterCmd.AddCommand(newServerlessClusterGetCmd())
 	serverlessClusterCmd.AddCommand(newServerlessClusterDeleteCmd())
+	serverlessClusterCmd.AddCommand(newServerlessClusterStopCmd())
 }
