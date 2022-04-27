@@ -79,7 +79,7 @@ func newServerlessClusterGetCmd() *cobra.Command {
 
 	serverlessClusterGetCmd := cobra.Command{
 		Use:     "get",
-		Short:   "This command get detailed configuration of serverless Hazelcast cluster instance.",
+		Short:   "This command get detailed configuration of a serverless Hazelcast cluster.",
 		Example: "hzcloud serverless-cluster get --cluster-id=100",
 		Run: func(cmd *cobra.Command, args []string) {
 			client := internal.NewClient()
@@ -99,6 +99,28 @@ func newServerlessClusterGetCmd() *cobra.Command {
 	return &serverlessClusterGetCmd
 }
 
+func newServerlessClusterDeleteCmd() *cobra.Command {
+	var serverlessClusterId string
+
+	serverlessClusterDeleteCmd := &cobra.Command{
+		Use:     "delete",
+		Short:   "This command deletes a serverless Hazelcast cluster.",
+		Example: "hzcloud serverless-cluster delete --cluster-id=100",
+		Run: func(cmd *cobra.Command, args []string) {
+			client := internal.NewClient()
+			clusterResponse := internal.Validate(client.ServerlessCluster.Delete(context.Background(), &models.ClusterDeleteInput{
+				ClusterId: serverlessClusterId,
+			})).(*models.ClusterId)
+			color.Blue("Cluster %d deleted.", clusterResponse.ClusterId)
+		},
+	}
+
+	serverlessClusterDeleteCmd.Flags().StringVar(&serverlessClusterId, "cluster-id", "", "id of the cluster")
+	_ = serverlessClusterDeleteCmd.MarkFlagRequired("cluster-id")
+
+	return serverlessClusterDeleteCmd
+}
+
 func init() {
 	serverlessClusterCmd := newServerlessClusterCmd()
 	rootCmd.AddCommand(serverlessClusterCmd)
@@ -106,4 +128,5 @@ func init() {
 	serverlessClusterCmd.AddCommand(newServerlessClusterCreateCmd())
 	serverlessClusterCmd.AddCommand(newServerlessClusterListCmd())
 	serverlessClusterCmd.AddCommand(newServerlessClusterGetCmd())
+	serverlessClusterCmd.AddCommand(newServerlessClusterDeleteCmd())
 }
