@@ -167,13 +167,19 @@ func newServerlessClusterResumeCmd() *cobra.Command {
 	return serverlessClusterResumeCmd
 }
 
+var serverlessCustomClassesCmd = &cobra.Command{
+	Use:     "custom-classes",
+	Aliases: []string{"clas"},
+	Short:   "This command allows you to manage custom classes on your starter cluster like; list, upload, delete.",
+}
+
 func newServerlessCustomClassesListCmd() *cobra.Command {
 	var clusterId string
 
 	serverlessCustomClassesListCmd := cobra.Command{
 		Use:     "list",
 		Short:   "This command lists Artifacts that contains Custom Classes uploaded to Hazelcast Instance.",
-		Example: "hzcloud starter-cluster custom-classes list",
+		Example: "hzcloud serverless-cluster custom-classes list",
 		Run: func(cmd *cobra.Command, args []string) {
 			client := internal.NewClient()
 			artifacts := internal.Validate(client.ServerlessCluster.ListUploadedArtifacts(context.Background(), &models.ListUploadedArtifactsInput{
@@ -206,7 +212,7 @@ func newServerlessClusterCustomClassesUploadCmd() *cobra.Command {
 	serverlessClusterCustomClassesUploadCmd := cobra.Command{
 		Use:     "upload",
 		Short:   "This command uploads Artifact with custom classes to Hazelcast Instance.",
-		Example: "hzcloud starter-cluster custom-classes upload",
+		Example: "hzcloud serverless-cluster custom-classes upload",
 		Run: func(cmd *cobra.Command, args []string) {
 			file, err := os.Open(customClassesFileName)
 			if err != nil {
@@ -217,7 +223,7 @@ func newServerlessClusterCustomClassesUploadCmd() *cobra.Command {
 
 			client := internal.NewClient()
 			artifact := internal.Validate(client.ServerlessCluster.UploadArtifact(context.Background(), &models.UploadArtifactInput{
-				ClusterId: starterClusterId,
+				ClusterId: clusterId,
 				FileName:  file.Name(),
 				Content:   file,
 			})).(*models.UploadedArtifact)
@@ -248,11 +254,11 @@ func newServerlessClusterCustomClassesDeleteCmd() *cobra.Command {
 	serverlessClusterCustomClassesDeleteCmd := cobra.Command{
 		Use:     "delete",
 		Short:   "This command deletes Artifact with custom classes that was uploaded to Hazelcast Instance.",
-		Example: "hzcloud starter-cluster custom-classes delete",
+		Example: "hzcloud serverless-cluster custom-classes delete",
 		Run: func(cmd *cobra.Command, args []string) {
 			client := internal.NewClient()
 			artifact := internal.Validate(client.ServerlessCluster.DeleteArtifact(context.Background(), &models.DeleteArtifactInput{
-				ClusterId:       starterClusterId,
+				ClusterId:       clusterId,
 				CustomClassesId: customClassesId,
 			})).(*models.UploadedArtifact)
 
@@ -285,7 +291,9 @@ func init() {
 	serverlessClusterCmd.AddCommand(newServerlessClusterDeleteCmd())
 	serverlessClusterCmd.AddCommand(newServerlessClusterStopCmd())
 	serverlessClusterCmd.AddCommand(newServerlessClusterResumeCmd())
-	serverlessClusterCmd.AddCommand(newServerlessCustomClassesListCmd())
-	serverlessClusterCmd.AddCommand(newServerlessClusterCustomClassesUploadCmd())
-	serverlessClusterCmd.AddCommand(newServerlessClusterCustomClassesDeleteCmd())
+
+	serverlessClusterCmd.AddCommand(serverlessCustomClassesCmd)
+	serverlessCustomClassesCmd.AddCommand(newServerlessCustomClassesListCmd())
+	serverlessCustomClassesCmd.AddCommand(newServerlessClusterCustomClassesUploadCmd())
+	serverlessCustomClassesCmd.AddCommand(newServerlessClusterCustomClassesDeleteCmd())
 }
