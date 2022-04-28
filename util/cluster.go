@@ -11,7 +11,7 @@ import (
 	"github.com/jedib0t/go-pretty/v6/list"
 )
 
-func AugmentStarterClusterType(starterClusterCreateClusterType string) (models.StarterClusterType, error) {
+func AugmentStarterClusterType(starterClusterCreateClusterType string) (models.ClusterType, error) {
 	switch strings.ToUpper(starterClusterCreateClusterType) {
 	case "FREE":
 		return models.Free, nil
@@ -70,6 +70,11 @@ func printCluster(cluster models.Cluster, printStyle PrintStyle) {
 	wr.Indent()
 	wr.AppendItem(fmt.Sprintf("Name: %s", cluster.ProductType.Name))
 	wr.AppendItem(fmt.Sprintf("Free: %t", cluster.ProductType.IsFree))
+	wr.UnIndent()
+
+	wr.AppendItem("Cluster Type")
+	wr.Indent()
+	wr.AppendItem(fmt.Sprintf("Name: %s", cluster.ClusterType.Name))
 	wr.UnIndent()
 
 	wr.AppendItem(fmt.Sprintf("State: %s", cluster.State))
