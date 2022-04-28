@@ -8,12 +8,9 @@ import (
 	"github.com/hazelcast/hazelcast-cloud-sdk-go/models"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
-	"os"
 )
 
 var starterClusterId string
-var customClassesId string
-var customClassesFileName string
 
 var starterClusterCreateInput models.CreateStarterClusterInput
 
@@ -120,86 +117,6 @@ var starterClusterResumeCmd = &cobra.Command{
 	},
 }
 
-var starterCustomClassesCmd = &cobra.Command{
-	Use:     "custom-classes",
-	Aliases: []string{"clas"},
-	Short:   "This command allows you to manage custom classes on your starter cluster like; list, upload, delete.",
-}
-
-var starterCustomClassesListCmd = &cobra.Command{
-	Use:     "list",
-	Short:   "This command lists Artifacts that contains Custom Classes uploaded to Hazelcast Instance.",
-	Example: "hzcloud starter-cluster custom-classes list",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := internal.NewClient()
-		artifacts := internal.Validate(client.StarterCluster.ListUploadedArtifacts(context.Background(), &models.ListUploadedArtifactsInput{
-			ClusterId: starterClusterId,
-		})).(*[]models.UploadedArtifact)
-		header := table.Row{"Id", "File Name", "Status"}
-		rows := []table.Row{}
-		for _, artifact := range *artifacts {
-			rows = append(rows, table.Row{artifact.Id, artifact.Name, artifact.Status})
-		}
-		util.Print(util.PrintRequest{
-			Header:     header,
-			Rows:       rows,
-			Data:       artifacts,
-			PrintStyle: util.PrintStyle(outputStyle),
-		})
-	},
-}
-
-var starterCustomClassesUploadCmd = &cobra.Command{
-	Use:     "upload",
-	Short:   "This command uploads Artifact with custom classes to Hazelcast Instance.",
-	Example: "hzcloud starter-cluster custom-classes upload",
-	Run: func(cmd *cobra.Command, args []string) {
-		file, err := os.Open(customClassesFileName)
-		if err != nil {
-			color.Red(err.Error())
-			os.Exit(1)
-		}
-		defer file.Close()
-
-		client := internal.NewClient()
-		artifact := internal.Validate(client.StarterCluster.UploadArtifact(context.Background(), &models.UploadArtifactInput{
-			ClusterId: starterClusterId,
-			FileName:  file.Name(),
-			Content:   file,
-		})).(*models.UploadedArtifact)
-
-		header := table.Row{"Id", "File Name", "Status"}
-		rows := []table.Row{{artifact.Id, artifact.Name, artifact.Status}}
-		util.Print(util.PrintRequest{
-			Header:     header,
-			Rows:       rows,
-			Data:       artifact,
-			PrintStyle: util.PrintStyle(outputStyle),
-		})
-	},
-}
-var starterCustomClassesDeleteCmd = &cobra.Command{
-	Use:     "delete",
-	Short:   "This command deletes Artifact with custom classes that was uploaded to Hazelcast Instance.",
-	Example: "hzcloud starter-cluster custom-classes delete",
-	Run: func(cmd *cobra.Command, args []string) {
-		client := internal.NewClient()
-		artifact := internal.Validate(client.StarterCluster.DeleteArtifact(context.Background(), &models.DeleteArtifactInput{
-			ClusterId:       starterClusterId,
-			CustomClassesId: customClassesId,
-		})).(*models.UploadedArtifact)
-
-		header := table.Row{"Id", "File Name", "Status"}
-		rows := []table.Row{{artifact.Id, artifact.Name, artifact.Status}}
-		util.Print(util.PrintRequest{
-			Header:     header,
-			Rows:       rows,
-			Data:       artifact,
-			PrintStyle: util.PrintStyle(outputStyle),
-		})
-	},
-}
-
 func init() {
 	rootCmd.AddCommand(starterClusterCmd)
 	starterClusterCmd.AddCommand(starterClusterListCmd)
@@ -238,23 +155,5 @@ func init() {
 	starterClusterCmd.AddCommand(starterClusterResumeCmd)
 	starterClusterResumeCmd.Flags().StringVar(&starterClusterId, "cluster-id", "", "id of the cluster")
 	_ = starterClusterResumeCmd.MarkFlagRequired("cluster-id")
-
-	starterClusterCmd.AddCommand(starterCustomClassesCmd)
-
-	starterCustomClassesCmd.AddCommand(starterCustomClassesListCmd)
-	starterCustomClassesListCmd.Flags().StringVar(&starterClusterId, "cluster-id", "", "id of the cluster")
-	_ = starterCustomClassesListCmd.MarkFlagRequired("cluster-id")
-
-	starterCustomClassesCmd.AddCommand(starterCustomClassesUploadCmd)
-	starterCustomClassesUploadCmd.Flags().StringVar(&starterClusterId, "cluster-id", "", "id of the cluster")
-	starterCustomClassesUploadCmd.Flags().StringVar(&customClassesFileName, "file-name", "", "File to upload")
-	_ = starterCustomClassesUploadCmd.MarkFlagRequired("cluster-id")
-	_ = starterCustomClassesUploadCmd.MarkFlagRequired("file-name")
-
-	starterCustomClassesCmd.AddCommand(starterCustomClassesDeleteCmd)
-	starterCustomClassesDeleteCmd.Flags().StringVar(&starterClusterId, "cluster-id", "", "id of the cluster")
-	starterCustomClassesDeleteCmd.Flags().StringVar(&customClassesId, "file-id", "", "id of the Uploaded Artifact")
-	_ = starterCustomClassesDeleteCmd.MarkFlagRequired("cluster-id")
-	_ = starterCustomClassesDeleteCmd.MarkFlagRequired("file-id")
 
 }
