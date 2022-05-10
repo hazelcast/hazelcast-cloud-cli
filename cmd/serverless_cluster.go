@@ -8,6 +8,7 @@ import (
 	"github.com/hazelcast/hazelcast-cloud-sdk-go/models"
 	"github.com/jedib0t/go-pretty/v6/table"
 	"github.com/spf13/cobra"
+	"os"
 )
 
 func newServerlessClusterCmd() *cobra.Command {
@@ -166,6 +167,122 @@ func newServerlessClusterResumeCmd() *cobra.Command {
 	return serverlessClusterResumeCmd
 }
 
+func newServerlessCustomClassesCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:     "custom-classes",
+		Aliases: []string{"clas"},
+		Short:   "This command allows you to manage custom classes on your serverless cluster like: list, upload, delete.",
+	}
+}
+
+func newServerlessCustomClassesListCmd() *cobra.Command {
+	var clusterId string
+
+	serverlessCustomClassesListCmd := cobra.Command{
+		Use:     "list",
+		Short:   "This command lists Artifacts that contains Custom Classes uploaded to Hazelcast Instance.",
+		Example: "hzcloud serverless-cluster custom-classes list",
+		Run: func(cmd *cobra.Command, args []string) {
+			client := internal.NewClient()
+			artifacts := internal.Validate(client.ServerlessCluster.ListUploadedArtifacts(context.Background(), &models.ListUploadedArtifactsInput{
+				ClusterId: clusterId,
+			})).(*[]models.UploadedArtifact)
+			header := table.Row{"Id", "File Name", "Status"}
+			rows := []table.Row{}
+			for _, artifact := range *artifacts {
+				rows = append(rows, table.Row{artifact.Id, artifact.Name, artifact.Status})
+			}
+			util.Print(util.PrintRequest{
+				Header:     header,
+				Rows:       rows,
+				Data:       artifacts,
+				PrintStyle: util.PrintStyle(outputStyle),
+			})
+		},
+	}
+
+	serverlessCustomClassesListCmd.Flags().StringVar(&clusterId, "cluster-id", "", "id of the cluster")
+	_ = serverlessCustomClassesListCmd.MarkFlagRequired("cluster-id")
+
+	return &serverlessCustomClassesListCmd
+}
+
+func newServerlessClusterCustomClassesUploadCmd() *cobra.Command {
+	var clusterId string
+	var customClassesFileName string
+
+	serverlessClusterCustomClassesUploadCmd := cobra.Command{
+		Use:     "upload",
+		Short:   "This command uploads Artifact with custom classes to Hazelcast Instance.",
+		Example: "hzcloud serverless-cluster custom-classes upload",
+		Run: func(cmd *cobra.Command, args []string) {
+			file, err := os.Open(customClassesFileName)
+			if err != nil {
+				color.Red(err.Error())
+				os.Exit(1)
+			}
+			defer file.Close()
+
+			client := internal.NewClient()
+			artifact := internal.Validate(client.ServerlessCluster.UploadArtifact(context.Background(), &models.UploadArtifactInput{
+				ClusterId: clusterId,
+				FileName:  file.Name(),
+				Content:   file,
+			})).(*models.UploadedArtifact)
+
+			header := table.Row{"Id", "File Name", "Status"}
+			rows := []table.Row{{artifact.Id, artifact.Name, artifact.Status}}
+			util.Print(util.PrintRequest{
+				Header:     header,
+				Rows:       rows,
+				Data:       artifact,
+				PrintStyle: util.PrintStyle(outputStyle),
+			})
+		},
+	}
+
+	serverlessClusterCustomClassesUploadCmd.Flags().StringVar(&clusterId, "cluster-id", "", "id of the cluster")
+	serverlessClusterCustomClassesUploadCmd.Flags().StringVar(&customClassesFileName, "file-name", "", "File to upload")
+	_ = serverlessClusterCustomClassesUploadCmd.MarkFlagRequired("cluster-id")
+	_ = serverlessClusterCustomClassesUploadCmd.MarkFlagRequired("file-name")
+
+	return &serverlessClusterCustomClassesUploadCmd
+}
+
+func newServerlessClusterCustomClassesDeleteCmd() *cobra.Command {
+	var clusterId string
+	var customClassesId string
+
+	serverlessClusterCustomClassesDeleteCmd := cobra.Command{
+		Use:     "delete",
+		Short:   "This command deletes Artifact with custom classes that was uploaded to Hazelcast Instance.",
+		Example: "hzcloud serverless-cluster custom-classes delete",
+		Run: func(cmd *cobra.Command, args []string) {
+			client := internal.NewClient()
+			artifact := internal.Validate(client.ServerlessCluster.DeleteArtifact(context.Background(), &models.DeleteArtifactInput{
+				ClusterId:       clusterId,
+				CustomClassesId: customClassesId,
+			})).(*models.UploadedArtifact)
+
+			header := table.Row{"Id", "File Name", "Status"}
+			rows := []table.Row{{artifact.Id, artifact.Name, artifact.Status}}
+			util.Print(util.PrintRequest{
+				Header:     header,
+				Rows:       rows,
+				Data:       artifact,
+				PrintStyle: util.PrintStyle(outputStyle),
+			})
+		},
+	}
+
+	serverlessClusterCustomClassesDeleteCmd.Flags().StringVar(&clusterId, "cluster-id", "", "id of the cluster")
+	serverlessClusterCustomClassesDeleteCmd.Flags().StringVar(&customClassesId, "file-id", "", "id of the Uploaded Artifact")
+	_ = serverlessClusterCustomClassesDeleteCmd.MarkFlagRequired("cluster-id")
+	_ = serverlessClusterCustomClassesDeleteCmd.MarkFlagRequired("file-id")
+
+	return &serverlessClusterCustomClassesDeleteCmd
+}
+
 func init() {
 	serverlessClusterCmd := newServerlessClusterCmd()
 	rootCmd.AddCommand(serverlessClusterCmd)
@@ -176,4 +293,10 @@ func init() {
 	serverlessClusterCmd.AddCommand(newServerlessClusterDeleteCmd())
 	serverlessClusterCmd.AddCommand(newServerlessClusterStopCmd())
 	serverlessClusterCmd.AddCommand(newServerlessClusterResumeCmd())
+
+	serverlessCustomClassesCmd := newServerlessCustomClassesCmd()
+	serverlessClusterCmd.AddCommand(serverlessCustomClassesCmd)
+	serverlessCustomClassesCmd.AddCommand(newServerlessCustomClassesListCmd())
+	serverlessCustomClassesCmd.AddCommand(newServerlessClusterCustomClassesUploadCmd())
+	serverlessCustomClassesCmd.AddCommand(newServerlessClusterCustomClassesDeleteCmd())
 }
