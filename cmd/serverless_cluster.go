@@ -171,7 +171,7 @@ func newServerlessCustomClassesCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:     "custom-classes",
 		Aliases: []string{"clas"},
-		Short:   "This command allows you to manage custom classes on your starter cluster like; list, upload, delete.",
+		Short:   "This command allows you to manage custom classes on your serverless cluster like: list, upload, delete.",
 	}
 }
 
