@@ -167,10 +167,12 @@ func newServerlessClusterResumeCmd() *cobra.Command {
 	return serverlessClusterResumeCmd
 }
 
-var serverlessCustomClassesCmd = &cobra.Command{
-	Use:     "custom-classes",
-	Aliases: []string{"clas"},
-	Short:   "This command allows you to manage custom classes on your starter cluster like; list, upload, delete.",
+func newServerlessCustomClassesCmd() *cobra.Command {
+	return &cobra.Command{
+		Use:     "custom-classes",
+		Aliases: []string{"clas"},
+		Short:   "This command allows you to manage custom classes on your starter cluster like; list, upload, delete.",
+	}
 }
 
 func newServerlessCustomClassesListCmd() *cobra.Command {
@@ -292,6 +294,7 @@ func init() {
 	serverlessClusterCmd.AddCommand(newServerlessClusterStopCmd())
 	serverlessClusterCmd.AddCommand(newServerlessClusterResumeCmd())
 
+	serverlessCustomClassesCmd := newServerlessCustomClassesCmd()
 	serverlessClusterCmd.AddCommand(serverlessCustomClassesCmd)
 	serverlessCustomClassesCmd.AddCommand(newServerlessCustomClassesListCmd())
 	serverlessCustomClassesCmd.AddCommand(newServerlessClusterCustomClassesUploadCmd())
