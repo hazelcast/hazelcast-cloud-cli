@@ -306,7 +306,7 @@ func newServerlessClusterCustomClassesDownloadCmd() *cobra.Command {
 
 	serverlessClusterCustomClassesDownloadCmd := cobra.Command{
 		Use:     "download",
-		Short:   "This command generates URL to download Artifact with custom classes that was uploaded to Hazelcast Instance.",
+		Short:   "This command downloads URL to download Artifact with custom classes that was uploaded to Hazelcast Instance.",
 		Example: "hzcloud serverless-cluster custom-classes download",
 		Run: func(cmd *cobra.Command, args []string) {
 			client := internal.NewClient()
