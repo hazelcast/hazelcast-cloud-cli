@@ -314,7 +314,7 @@ func newServerlessClusterCustomClassesDownloadCmd() *cobra.Command {
 				&models.DownloadArtifactInput{
 					ClusterId:       clusterId,
 					CustomClassesId: customClassesId,
-				})).(*models.UploadedArtifactUrl)
+				})).(*models.UploadedArtifactLink)
 
 			header := table.Row{"Id", "File Name"}
 			rows := []table.Row{{artifact.Id, artifact.Name}}
