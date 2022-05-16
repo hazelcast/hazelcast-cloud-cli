@@ -7,7 +7,11 @@ import (
 	"github.com/hazelcast/hazelcast-cloud-cli/util"
 	"github.com/hazelcast/hazelcast-cloud-sdk-go/models"
 	"github.com/jedib0t/go-pretty/v6/table"
+	"github.com/schollz/progressbar/v3"
 	"github.com/spf13/cobra"
+	"io"
+	"io/ioutil"
+	"net/http"
 	"os"
 )
 
@@ -34,23 +38,26 @@ func newServerlessClusterCreateCmd() *cobra.Command {
 				createClusterInputParams.ClusterType = models.Serverless
 			}
 			client := internal.NewClient()
-			cluster := internal.Validate(client.ServerlessCluster.Create(context.Background(), &createClusterInputParams)).(*models.Cluster)
-			color.Green("Cluster %s is creating. You can check the status using hzcloud serverless-cluster list.", cluster.Id)
+			cluster := internal.Validate(client.ServerlessCluster.Create(context.Background(),
+				&createClusterInputParams)).(*models.Cluster)
+			color.Green("Cluster %s is creating. You can check the status using hzcloud serverless-cluster list.",
+				cluster.Id)
 			return nil
 		},
 	}
 
-	serverlessClusterCreateCmd.Flags().StringVar(&createClusterInputParams.Name, "name", "", "name of the cluster (required)")
+	serverlessClusterCreateCmd.Flags().StringVar(&createClusterInputParams.Name, "name", "",
+		"name of the cluster (required)")
 	_ = serverlessClusterCreateCmd.MarkFlagRequired("name")
 
-	serverlessClusterCreateCmd.Flags().StringVar(&createClusterInputParams.Region, "region", "", "name of the region (required)")
+	serverlessClusterCreateCmd.Flags().StringVar(&createClusterInputParams.Region, "region", "",
+		"name of the region (required)")
 	_ = serverlessClusterCreateCmd.MarkFlagRequired("region")
 
 	serverlessClusterCreateCmd.Flags().BoolVar(&devModeEnabled, "dev-mode-enabled", false, "development mode")
 
 	return &serverlessClusterCreateCmd
 }
-
 func newServerlessClusterListCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:     "list",
@@ -62,9 +69,11 @@ func newServerlessClusterListCmd() *cobra.Command {
 			header := table.Row{"Id", "Name", "Type", "State", "Version", "Memory (GiB)", "Cloud Provider", "Region"}
 			var rows []table.Row
 			for _, cluster := range *clusters {
-				rows = append(rows, table.Row{cluster.Id, cluster.Name, cluster.ClusterType.Name, cluster.State,
+				rows = append(rows, table.Row{
+					cluster.Id, cluster.Name, cluster.ClusterType.Name, cluster.State,
 					cluster.HazelcastVersion, cluster.Specs.TotalMemory, cluster.CloudProvider.Name,
-					cluster.CloudProvider.Region})
+					cluster.CloudProvider.Region,
+				})
 			}
 			util.Print(util.PrintRequest{
 				Header:     header,
@@ -85,9 +94,10 @@ func newServerlessClusterGetCmd() *cobra.Command {
 		Example: "hzcloud serverless-cluster get --cluster-id=100",
 		Run: func(cmd *cobra.Command, args []string) {
 			client := internal.NewClient()
-			cluster := internal.Validate(client.ServerlessCluster.Get(context.Background(), &models.GetServerlessClusterInput{
-				ClusterId: serverlessClusterId,
-			})).(*models.Cluster)
+			cluster := internal.Validate(client.ServerlessCluster.Get(context.Background(),
+				&models.GetServerlessClusterInput{
+					ClusterId: serverlessClusterId,
+				})).(*models.Cluster)
 			util.Print(util.PrintRequest{
 				Data:       *cluster,
 				PrintStyle: util.PrintStyle(outputStyle),
@@ -110,9 +120,10 @@ func newServerlessClusterDeleteCmd() *cobra.Command {
 		Example: "hzcloud serverless-cluster delete --cluster-id=100",
 		Run: func(cmd *cobra.Command, args []string) {
 			client := internal.NewClient()
-			clusterResponse := internal.Validate(client.ServerlessCluster.Delete(context.Background(), &models.ClusterDeleteInput{
-				ClusterId: serverlessClusterId,
-			})).(*models.ClusterId)
+			clusterResponse := internal.Validate(client.ServerlessCluster.Delete(context.Background(),
+				&models.ClusterDeleteInput{
+					ClusterId: serverlessClusterId,
+				})).(*models.ClusterId)
 			color.Blue("Cluster %d deleted.", clusterResponse.ClusterId)
 		},
 	}
@@ -132,9 +143,10 @@ func newServerlessClusterStopCmd() *cobra.Command {
 		Example: "hzcloud serverless-cluster stop --cluster-id=100",
 		Run: func(cmd *cobra.Command, args []string) {
 			client := internal.NewClient()
-			clusterResponse := internal.Validate(client.ServerlessCluster.Stop(context.Background(), &models.ClusterStopInput{
-				ClusterId: serverlessClusterId,
-			})).(*models.ClusterId)
+			clusterResponse := internal.Validate(client.ServerlessCluster.Stop(context.Background(),
+				&models.ClusterStopInput{
+					ClusterId: serverlessClusterId,
+				})).(*models.ClusterId)
 			color.Blue("Cluster %d stopped.", clusterResponse.ClusterId)
 		},
 	}
@@ -154,9 +166,10 @@ func newServerlessClusterResumeCmd() *cobra.Command {
 		Example: "hzcloud serverless-cluster resume --cluster-id=100",
 		Run: func(cmd *cobra.Command, args []string) {
 			client := internal.NewClient()
-			clusterResponse := internal.Validate(client.ServerlessCluster.Resume(context.Background(), &models.ClusterResumeInput{
-				ClusterId: serverlessClusterId,
-			})).(*models.ClusterId)
+			clusterResponse := internal.Validate(client.ServerlessCluster.Resume(context.Background(),
+				&models.ClusterResumeInput{
+					ClusterId: serverlessClusterId,
+				})).(*models.ClusterId)
 			color.Blue("Cluster %d resumed.", clusterResponse.ClusterId)
 		},
 	}
@@ -184,9 +197,10 @@ func newServerlessCustomClassesListCmd() *cobra.Command {
 		Example: "hzcloud serverless-cluster custom-classes list",
 		Run: func(cmd *cobra.Command, args []string) {
 			client := internal.NewClient()
-			artifacts := internal.Validate(client.ServerlessCluster.ListUploadedArtifacts(context.Background(), &models.ListUploadedArtifactsInput{
-				ClusterId: clusterId,
-			})).(*[]models.UploadedArtifact)
+			artifacts := internal.Validate(client.ServerlessCluster.ListUploadedArtifacts(context.Background(),
+				&models.ListUploadedArtifactsInput{
+					ClusterId: clusterId,
+				})).(*[]models.UploadedArtifact)
 			header := table.Row{"Id", "File Name", "Status"}
 			rows := []table.Row{}
 			for _, artifact := range *artifacts {
@@ -224,11 +238,12 @@ func newServerlessClusterCustomClassesUploadCmd() *cobra.Command {
 			defer file.Close()
 
 			client := internal.NewClient()
-			artifact := internal.Validate(client.ServerlessCluster.UploadArtifact(context.Background(), &models.UploadArtifactInput{
-				ClusterId: clusterId,
-				FileName:  file.Name(),
-				Content:   file,
-			})).(*models.UploadedArtifact)
+			artifact := internal.Validate(client.ServerlessCluster.UploadArtifact(context.Background(),
+				&models.UploadArtifactInput{
+					ClusterId: clusterId,
+					FileName:  file.Name(),
+					Content:   file,
+				})).(*models.UploadedArtifact)
 
 			header := table.Row{"Id", "File Name", "Status"}
 			rows := []table.Row{{artifact.Id, artifact.Name, artifact.Status}}
@@ -259,10 +274,11 @@ func newServerlessClusterCustomClassesDeleteCmd() *cobra.Command {
 		Example: "hzcloud serverless-cluster custom-classes delete",
 		Run: func(cmd *cobra.Command, args []string) {
 			client := internal.NewClient()
-			artifact := internal.Validate(client.ServerlessCluster.DeleteArtifact(context.Background(), &models.DeleteArtifactInput{
-				ClusterId:       clusterId,
-				CustomClassesId: customClassesId,
-			})).(*models.UploadedArtifact)
+			artifact := internal.Validate(client.ServerlessCluster.DeleteArtifact(context.Background(),
+				&models.DeleteArtifactInput{
+					ClusterId:       clusterId,
+					CustomClassesId: customClassesId,
+				})).(*models.UploadedArtifact)
 
 			header := table.Row{"Id", "File Name", "Status"}
 			rows := []table.Row{{artifact.Id, artifact.Name, artifact.Status}}
@@ -276,11 +292,79 @@ func newServerlessClusterCustomClassesDeleteCmd() *cobra.Command {
 	}
 
 	serverlessClusterCustomClassesDeleteCmd.Flags().StringVar(&clusterId, "cluster-id", "", "id of the cluster")
-	serverlessClusterCustomClassesDeleteCmd.Flags().StringVar(&customClassesId, "file-id", "", "id of the Uploaded Artifact")
+	serverlessClusterCustomClassesDeleteCmd.Flags().StringVar(&customClassesId, "file-id", "",
+		"id of the Uploaded Artifact")
 	_ = serverlessClusterCustomClassesDeleteCmd.MarkFlagRequired("cluster-id")
 	_ = serverlessClusterCustomClassesDeleteCmd.MarkFlagRequired("file-id")
 
 	return &serverlessClusterCustomClassesDeleteCmd
+}
+
+func newServerlessClusterCustomClassesDownloadCmd() *cobra.Command {
+	var clusterId string
+	var customClassesId string
+
+	serverlessClusterCustomClassesDownloadCmd := cobra.Command{
+		Use:     "download",
+		Short:   "This command generates URL to download Artifact with custom classes that was uploaded to Hazelcast Instance.",
+		Example: "hzcloud serverless-cluster custom-classes download",
+		Run: func(cmd *cobra.Command, args []string) {
+			client := internal.NewClient()
+			artifact := internal.Validate(client.ServerlessCluster.DownloadArtifact(context.Background(),
+				&models.DownloadArtifactInput{
+					ClusterId:       clusterId,
+					CustomClassesId: customClassesId,
+				})).(*models.UploadedArtifactUrl)
+
+			header := table.Row{"Id", "File Name"}
+			rows := []table.Row{{artifact.Id, artifact.Name}}
+			util.Print(util.PrintRequest{
+				Header:     header,
+				Rows:       rows,
+				Data:       artifact,
+				PrintStyle: util.PrintStyle(outputStyle),
+			})
+			httpClient := http.Client{}
+			request, requestErr := http.NewRequest("GET", artifact.Url, nil)
+			if requestErr != nil {
+				color.Red(requestErr.Error())
+				os.Exit(1)
+			}
+			response, responseErr := httpClient.Do(request)
+			if responseErr != nil {
+				color.Red(responseErr.Error())
+				os.Exit(1)
+			}
+			tmpFile, tmpFileErr := ioutil.TempFile("", "*-"+artifact.Name)
+			if tmpFileErr != nil {
+				color.Red(tmpFileErr.Error())
+				os.Exit(1)
+			}
+			defer tmpFile.Close()
+			bar := progressbar.DefaultBytes(
+				response.ContentLength,
+				"downloading "+artifact.Name,
+			)
+			_, writeErr := io.Copy(io.MultiWriter(tmpFile, bar), response.Body)
+			if writeErr != nil {
+				color.Red(writeErr.Error())
+				os.Exit(1)
+			}
+			renameErr := os.Rename(tmpFile.Name(), artifact.Name)
+			if renameErr != nil {
+				color.Red(renameErr.Error())
+				os.Exit(1)
+			}
+		},
+	}
+
+	serverlessClusterCustomClassesDownloadCmd.Flags().StringVar(&clusterId, "cluster-id", "", "id of the cluster")
+	serverlessClusterCustomClassesDownloadCmd.Flags().StringVar(&customClassesId, "file-id", "",
+		"id of the Uploaded Artifact")
+	_ = serverlessClusterCustomClassesDownloadCmd.MarkFlagRequired("cluster-id")
+	_ = serverlessClusterCustomClassesDownloadCmd.MarkFlagRequired("file-id")
+
+	return &serverlessClusterCustomClassesDownloadCmd
 }
 
 func init() {
@@ -299,4 +383,5 @@ func init() {
 	serverlessCustomClassesCmd.AddCommand(newServerlessCustomClassesListCmd())
 	serverlessCustomClassesCmd.AddCommand(newServerlessClusterCustomClassesUploadCmd())
 	serverlessCustomClassesCmd.AddCommand(newServerlessClusterCustomClassesDeleteCmd())
+	serverlessCustomClassesCmd.AddCommand(newServerlessClusterCustomClassesDownloadCmd())
 }
