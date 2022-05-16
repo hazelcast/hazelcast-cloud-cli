@@ -17,15 +17,14 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.1.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/uuid v1.3.0
-	github.com/hazelcast/hazelcast-cloud-sdk-go v1.3.1
+	github.com/hazelcast/hazelcast-cloud-sdk-go v1.3.2-0.20220510130800-fdf9da1d0708
 	github.com/jedib0t/go-pretty/v6 v6.2.4
 	github.com/mattn/go-colorable v0.1.11 // indirect
-	github.com/mattn/go-runewidth v0.0.13 // indirect
+	github.com/schollz/progressbar/v3 v3.8.6
 	github.com/spf13/cobra v1.2.1
-	golang.org/x/crypto v0.0.0-20210921155107-089bfa567519 // indirect
-	golang.org/x/net v0.0.0-20210929193557-e81a3d93ecf6 // indirect
-	golang.org/x/sys v0.0.0-20211004093028-2c5d950f24ef // indirect
-	golang.org/x/term v0.0.0-20210927222741-03fcf44c2211
+	golang.org/x/crypto v0.0.0-20220513210258-46612604a0f9 // indirect
+	golang.org/x/sys v0.0.0-20220513210249-45d2b4557a2a // indirect
+	golang.org/x/term v0.0.0-20220411215600-e5f449aeb171
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/api v0.58.0
 	google.golang.org/genproto v0.0.0-20211001223012-bfb93cce50d9 // indirect
