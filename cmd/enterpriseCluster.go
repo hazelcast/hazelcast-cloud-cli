@@ -131,7 +131,7 @@ var enterpriseClusterDeleteCmd = &cobra.Command{
 func newEnterpriseCustomClassesCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:     "custom-classes",
-		Aliases: []string{"class"},
+		Aliases: []string{"classes"},
 		Short:   "This command allows you to manage custom classes on your enterprise cluster like: list, upload, delete.",
 	}
 }
