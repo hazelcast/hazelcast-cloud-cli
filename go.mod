@@ -17,7 +17,7 @@ require (
 	github.com/golang-jwt/jwt/v4 v4.1.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/google/uuid v1.3.0
-	github.com/hazelcast/hazelcast-cloud-sdk-go v1.3.2
+	github.com/hazelcast/hazelcast-cloud-sdk-go v1.3.3
 	github.com/jedib0t/go-pretty/v6 v6.2.4
 	github.com/mattn/go-colorable v0.1.11 // indirect
 	github.com/schollz/progressbar/v3 v3.8.6
