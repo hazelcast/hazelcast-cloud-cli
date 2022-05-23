@@ -13,6 +13,7 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"path/filepath"
 )
 
 func newServerlessClusterCmd() *cobra.Command {
@@ -183,7 +184,7 @@ func newServerlessClusterResumeCmd() *cobra.Command {
 func newServerlessCustomClassesCmd() *cobra.Command {
 	return &cobra.Command{
 		Use:     "custom-classes",
-		Aliases: []string{"clas"},
+		Aliases: []string{"classes"},
 		Short:   "This command allows you to manage custom classes on your serverless cluster like: list, upload, delete.",
 	}
 }
@@ -241,7 +242,7 @@ func newServerlessClusterCustomClassesUploadCmd() *cobra.Command {
 			artifact := internal.Validate(client.ServerlessCluster.UploadArtifact(context.Background(),
 				&models.UploadArtifactInput{
 					ClusterId: clusterId,
-					FileName:  file.Name(),
+					FileName:  filepath.Base(file.Name()),
 					Content:   file,
 				})).(*models.UploadedArtifact)
 
