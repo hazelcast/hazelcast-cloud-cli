@@ -238,12 +238,18 @@ func newServerlessClusterCustomClassesUploadCmd() *cobra.Command {
 			}
 			defer file.Close()
 
+			stat, err := file.Stat()
+			if err != nil {
+				color.Red(err.Error())
+				os.Exit(1)
+			}
+			reader := progressbar.NewReader(file, progressbar.DefaultBytes(stat.Size(), "uploading "+file.Name()))
 			client := internal.NewClient()
 			artifact := internal.Validate(client.ServerlessCluster.UploadArtifact(context.Background(),
 				&models.UploadArtifactInput{
 					ClusterId: clusterId,
 					FileName:  filepath.Base(file.Name()),
-					Content:   file,
+					Content:   &reader,
 				})).(*models.UploadedArtifact)
 
 			header := table.Row{"Id", "File Name", "Status"}
