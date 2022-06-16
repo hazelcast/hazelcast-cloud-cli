@@ -10,7 +10,7 @@
 </p>
 
 > Hazelcast Cloud CLI is known as `hzcloud` is a command line tool to make actions on Hazelcast Cloud easily. Hazelcast Cloud offers the leading in-memory computing platform, Hazelcast IMDG, as a fully managed service that integrates with your existing virtual private cloud.
- <img alt="Screenshot" src="https://user-images.githubusercontent.com/1237982/97022384-b901a780-155c-11eb-87b4-5f4e945a0f1c.png" />
+ <img alt="Screenshot" src="./Screenshot.png" />
 
 ## Installing `hzcloud`
 ### Using a Package Manager (Homebrew)
@@ -57,6 +57,14 @@ $ hzcloud login
 
 ## :rocket: Examples
 You can use `hzcloud` to interact with resources on **Hazelast Cloud**. You can find some examples to begin with.
+
+- **Create a Serveless Cluster for development**
+```sh
+hzcloud serverless-cluster create \
+  --name=mydevcluster \
+  --dev-mode-enabled=true \
+  --region=us-west-2
+```
 
 - **Create a Starter Cluster**
 ```sh
@@ -122,6 +130,6 @@ Contributions, issues and feature requests are welcome!<br />Feel free to check 
 
 ## 📝 License
 
-Copyright © 2020 [Hazelcast](https://github.com/hazelcast).<br />
+Copyright © 2022 [Hazelcast](https://github.com/hazelcast).<br />
 This project is [Apache License 2.0](https://github.com/hazelcast/hazelcast-cloud-cli) licensed.<br /><br />
 <img alt="logo" width="300" src="https://cloud.hazelcast.com/static/images/hz-cloud-logo.svg" />
