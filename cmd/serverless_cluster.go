@@ -31,7 +31,7 @@ func newServerlessClusterCreateCmd() *cobra.Command {
 	serverlessClusterCreateCmd := cobra.Command{
 		Use:     "create",
 		Short:   "This command allows you to create a serverless Hazelcast cluster.",
-		Example: "hzcloud serverless-cluster create --name=mycluster --region=us-west-2",
+		Example: "hzcloud serverless-cluster create --name=mycluster --region=us-east-1",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			if devModeEnabled {
 				createClusterInputParams.ClusterType = models.Devmode
