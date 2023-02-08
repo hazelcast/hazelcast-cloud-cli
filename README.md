@@ -42,7 +42,15 @@ wget \
   -O /usr/local/bin/hzcloud && chmod +x /usr/local/bin/hzcloud
 ```
 ## Authentication with Hazelcast Cloud
-After a successful installation, in order to use, you need to authenticate with Hazelcast Cloud by providing access tokens, which can be created from `Developers` tab in [Hazelcast Cloud](https://cloud.hazelcast.com/settings/developer). You can check how to generate API Key and API Secret following the [Hazelcast Cloud Documentation](https://docs.cloud.hazelcast.com/docs/developer).
+After a successful installation, in order to use, you need to authenticate with Hazelcast Cloud by providing access tokens, which can be created from `Developers` tab in [Hazelcast Cloud](https://cloud.hazelcast.com/settings/developer). You can check how to generate API Key and API Secret following the [Hazelcast Cloud Documentation](https://docs.cloud.hazelcast.com/docs/developer). 
+
+`hzcloud` is configured against [Hazelcast Cloud](https://cloud.hazelcast.com) by default. However, you can use it with [Hazelcast Viridian](https://viridian.hazelcast.com/) as well by setting `HZ_CLOUD_API_URL` environment variable:  
+
+````
+echo HZ_CLOUD_API_URL=https://viridian.hazelcast.com/api/v1
+````
+
+**_Please note, not all features are supported for Hazelcast Viridian._**
 
 ### Using Environment Variables (Option 1)
 You can pass your API Key as `HZ_CLOUD_API_KEY` and API Secret as `HZ_CLOUD_API_SECRET` on your environment variables. `hzcloud` will use these them to authenticate with Hazelcast Cloud
