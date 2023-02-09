@@ -114,6 +114,14 @@ hzcloud enterprise-cluster list
 hzcloud version update
 ```
 
+### Experimental
+`hzcloud` configured to use [Hazelcast Cloud](https://cloud.hazelcast.com) by default. However, you can use it with [Hazelcast Viridian](https://viridian.hazelcast.com/) as well by setting `HZ_CLOUD_API_URL` environment variable (don't forget to get authenticated accordingly, see [Authentication with Hazelcast Cloud](#authentication-with-hazelcast-cloud) section above):
+```sh
+export HZ_CLOUD_API_URL=https://viridian.hazelcast.com/api/v1
+```
+
+**_Please note, not all features are supported for Hazelcast Viridian._**
+
 ## 🏷️ Versioning
 
 We use [SemVer](http://semver.org/) for versioning. For the versions available, see the [tags on this repository](https://github.com/hazelcast/hazelcast-cloud-cli/tags).
@@ -130,6 +138,6 @@ Contributions, issues and feature requests are welcome!<br />Feel free to check 
 
 ## 📝 License
 
-Copyright © 2022 [Hazelcast](https://github.com/hazelcast).<br />
+Copyright © 2023 [Hazelcast](https://github.com/hazelcast).<br />
 This project is [Apache License 2.0](https://github.com/hazelcast/hazelcast-cloud-cli) licensed.<br /><br />
 <img alt="logo" width="300" src="https://cloud.hazelcast.com/static/images/hz-cloud-logo.svg" />
