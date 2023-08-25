@@ -56,7 +56,7 @@ $ hzcloud login
 ```
 
 ## :rocket: Examples
-You can use `hzcloud` to interact with resources on **Hazelast Cloud**. You can find some examples to begin with.
+You can use `hzcloud` to interact with resources on **Hazelcast Cloud**. You can find some examples to begin with.
 
 - **Create a Serveless Cluster for development**
 ```sh
