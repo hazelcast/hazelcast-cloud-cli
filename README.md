@@ -1,3 +1,5 @@
+**NOTE**: _This repository is no longer maintained, `hzcloud` CLI has been deprecated and replaced it with HZ CLC (Command-Line-Client). Please find instructions on how to install HZ CLC at: https://docs.hazelcast.com/clc/latest/install-clc_</code>
+
 <h1>Hazelcast Cloud CLI</h1>
 <p>
   <img alt="release" src="https://github.com/hazelcast/hazelcast-cloud-cli/workflows/Release/badge.svg" />
